@@ -9,14 +9,21 @@ Write-Host "==================================================================" 
 # 1. Check for Rust / Cargo
 Write-Host "[1/4] Checking Rust toolchain..." -ForegroundColor Yellow
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
-    Write-Host "[!] Cargo not detected! Downloading and installing rustup..." -ForegroundColor Yellow
-    $rustupUrl = "https://win.rustup.rs/x86_64"
-    $installer = "$env:TEMP\rustup-init.exe"
-    Invoke-WebRequest -Uri $rustupUrl -OutFile $installer
-    Start-Process -FilePath $installer -ArgumentList "-y", "--default-toolchain", "stable" -Wait
-    Remove-Item -Force $installer
-    $env:PATH += ";$env:USERPROFILE\.cargo\bin"
-    Write-Host "[✓] Rust installed successfully!" -ForegroundColor Green
+    $cargoExe = "$env:USERPROFILE\.cargo\bin\cargo.exe"
+    if (Test-Path $cargoExe) {
+        $env:PATH = "$env:USERPROFILE\.cargo\bin;" + $env:PATH
+        $ver = & cargo --version
+        Write-Host "[✓] Located existing Cargo in ~/.cargo/bin: $ver" -ForegroundColor Green
+    } else {
+        Write-Host "[!] Cargo not detected! Downloading and installing rustup..." -ForegroundColor Yellow
+        $rustupUrl = "https://win.rustup.rs/x86_64"
+        $installer = "$env:TEMP\rustup-init.exe"
+        Invoke-WebRequest -Uri $rustupUrl -OutFile $installer
+        Start-Process -FilePath $installer -ArgumentList "-y", "--default-toolchain", "stable" -Wait
+        Remove-Item -Force $installer
+        $env:PATH += ";$env:USERPROFILE\.cargo\bin"
+        Write-Host "[✓] Rust installed successfully!" -ForegroundColor Green
+    }
 } else {
     $ver = & cargo --version
     Write-Host "[✓] $ver detected!" -ForegroundColor Green

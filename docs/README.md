@@ -70,3 +70,33 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
 9. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
    - Side-by-side Java vs. Rust code translations
    - Differences in threading and memory models
+
+---
+
+## ⚡ Instant Setup Links
+
+Install the development environment directly from your terminal:
+
+- **Linux**:
+  ```bash
+  curl -sSL https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-linux.sh | bash
+  ```
+- **macOS**:
+  ```bash
+  curl -sSL https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-macos.sh | bash
+  ```
+- **Windows (PowerShell)**:
+  ```powershell
+  irm https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-windows.ps1 | iex
+  ```
+
+---
+
+## 💬 API Suggestions & Reporting Issues
+
+- **API Suggestions & New Features**:
+  Join our Discord: [**Flaxa Studios Discord**](https://discord.com/invite/UUaNzfZyc6) in the `#api-suggestions` or `#plugin-development` channels!
+- **Bug Reports & Issues**:
+  Report on Discord in `#bugs-support` or open an issue on [**GitHub Issues**](https://github.com/Flaxa-Technologies/potato-api/issues).
+- **Official Website**: [**https://potatomc.flaxa.in/**](https://potatomc.flaxa.in/)
+

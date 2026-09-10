@@ -33,29 +33,45 @@ By executing natively in-process, PotatoMC plugins eliminate Java Virtual Machin
 
 ## ⚡ Quick Start
 
-### 1. Set Up Your Environment
+### 1. One-Line Environment Setup (No Cloning Needed!)
 
-Run the automated setup script for your platform:
+Run the automated setup command directly in your terminal:
 
-| Platform | Setup Command |
-|---|---|
-| **Windows** | `powershell .\scripts\setup-windows.ps1` or run `scripts\setup-windows.bat` |
-| **Linux** | `chmod +x scripts/setup-linux.sh && ./scripts/setup-linux.sh` |
-| **macOS** | `chmod +x scripts/setup-macos.sh && ./scripts/setup-macos.sh` |
-
-### 2. Scaffold a New Plugin
-
-Use our automated generator to scaffold a fresh plugin in seconds:
-
+#### 🐧 Linux (Ubuntu, Debian, Arch, Fedora)
 ```bash
-# Using Python (Cross-Platform)
+curl -sSL https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-linux.sh | bash
+```
+
+#### 🍎 macOS (Apple Silicon & Intel)
+```bash
+curl -sSL https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-macos.sh | bash
+```
+
+#### 🪟 Windows (PowerShell)
+```powershell
+irm https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-windows.ps1 | iex
+```
+*(Or from Command Prompt: `powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/setup-windows.ps1 | iex"`)*
+
+---
+
+### 2. Scaffold a New Plugin in Seconds
+
+Scaffold a fresh plugin project instantly with a single command:
+
+#### Linux & macOS (Bash):
+```bash
+curl -sSL https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/create-plugin.sh | bash -s MyAwesomePlugin "Your Name" linux
+```
+
+#### Windows (PowerShell):
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/create-plugin.ps1))) -Name MyAwesomePlugin -Platform windows
+```
+
+#### Cross-Platform (Python):
+```bash
 python scripts/create-plugin.py MyAwesomePlugin --author "Your Name" --platform windows
-
-# Or using PowerShell (Windows)
-powershell .\scripts\create-plugin.ps1 -Name MyAwesomePlugin -Platform windows
-
-# Or using Bash (Linux/macOS)
-./scripts/create-plugin.sh my-awesome-plugin "Your Name" linux
 ```
 
 ### 3. Add to an Existing Project (`Cargo.toml`)
@@ -185,12 +201,18 @@ Explore the complete API reference in the [`docs/`](docs/) directory:
 
 ---
 
-## 🌐 Community & Links
+## 💬 API Suggestions & Reporting Issues
 
-- **Official Website**: [https://potatomc.flaxa.in/](https://potatomc.flaxa.in/)
-- **Discord Community**: [Flaxa Studios & Inxtra Launcher](https://discord.com/invite/UUaNzfZyc6)
-- **Parent Organization**: Flaxa Studios / Flaxa Technologies
-- **Issue Tracker**: [GitHub Issues](https://github.com/Flaxa-Technologies/potato-api/issues)
+We actively build and expand PotatoMC's plugin ecosystem around developer feedback!
+
+- **💡 Have an API Suggestion or Feature Request?**
+  - Join our Discord: [**Flaxa Studios Discord**](https://discord.com/invite/UUaNzfZyc6)
+  - Post in `#api-suggestions` or `#plugin-development` to request new event hooks, packets, or host interfaces.
+- **🐛 Found a Bug or Issue?**
+  - Report on Discord: [**Flaxa Studios Discord**](https://discord.com/invite/UUaNzfZyc6) in the `#bugs-support` channel.
+  - Or open an official issue ticket: [**GitHub Issues**](https://github.com/Flaxa-Technologies/potato-api/issues).
+- **🌐 Official Website**: [**https://potatomc.flaxa.in/**](https://potatomc.flaxa.in/)
+- **🏢 Organization**: Flaxa Studios / Flaxa Technologies
 
 ---
 
@@ -198,3 +220,4 @@ Explore the complete API reference in the [`docs/`](docs/) directory:
 
 The PotatoMC Native Plugin API is licensed under the [GNU General Public License v3.0](LICENSE).
 Plugins built against `potato-api` can be licensed according to their author's choice.
+

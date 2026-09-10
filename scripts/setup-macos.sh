@@ -22,8 +22,8 @@ echo "[✓] Xcode Command Line Tools detected."
 echo "[2/3] Checking Rust toolchain..."
 if ! command -v cargo &> /dev/null; then
     echo "[!] Cargo not found! Installing via https://sh.rustup.rs..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-    source "$HOME/.cargo/env"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable < /dev/null
+    source "$HOME/.cargo/env" 2>/dev/null || true
 fi
 RUST_VER=$(cargo --version)
 echo "[✓] Using: $RUST_VER"

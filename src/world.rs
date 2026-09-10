@@ -1,0 +1,119 @@
+use std::sync::Arc;
+
+use crate::entity::Entity;
+use crate::host::HostWorld;
+use crate::player::Player;
+use crate::types::{Block, Difficulty, Location};
+
+/// Safe abstraction representing a loaded dimension/world on the PotatoMC server.
+#[derive(Clone)]
+pub struct World {
+    pub(crate) handle: Arc<dyn HostWorld>,
+}
+
+impl World {
+    pub fn from_handle(handle: Arc<dyn HostWorld>) -> Self {
+        Self { handle }
+    }
+
+    pub fn inner(&self) -> &Arc<dyn HostWorld> {
+        &self.handle
+    }
+
+    /// Returns the unique dimension/world identifier, e.g. "minecraft:overworld".
+    pub fn identity(&self) -> String {
+        self.handle.identity()
+    }
+
+    /// Retrieves the block at the specified world block coordinates.
+    pub fn get_block(&self, x: i32, y: i32, z: i32) -> Option<Block> {
+        self.handle.get_block(x, y, z)
+    }
+
+    /// Sets the block state at the specified world block coordinates.
+    pub fn set_block(&self, x: i32, y: i32, z: i32, block: &Block) -> bool {
+        self.handle.set_block(x, y, z, block)
+    }
+
+    /// Spawns an entity of the given type at the target location.
+    pub fn spawn_entity(&self, entity_type: &str, location: &Location) -> Result<Entity, String> {
+        self.handle
+            .spawn_entity(entity_type, location)
+            .map(Entity::from_handle)
+    }
+
+    /// Searches for an online player in this world by their username.
+    pub fn player_lookup(&self, name: &str) -> Option<Player> {
+        self.handle.player_lookup(name).map(Player::from_handle)
+    }
+
+    /// Returns a list of all players currently present in this world.
+    pub fn players(&self) -> Vec<Player> {
+        self.handle
+            .players()
+            .into_iter()
+            .map(Player::from_handle)
+            .collect()
+    }
+
+    /// Returns the world time of day in game ticks (0-24000).
+    pub fn time(&self) -> u64 {
+        self.handle.time()
+    }
+
+    /// Sets the world time of day in game ticks.
+    pub fn set_time(&self, time: u64) {
+        self.handle.set_time(time);
+    }
+
+    /// Checks whether it is currently raining/storming in this world.
+    pub fn is_raining(&self) -> bool {
+        self.handle.is_raining()
+    }
+
+    /// Sets whether it is raining/storming in this world.
+    pub fn set_storm(&self, storm: bool) {
+        self.handle.set_storm(storm);
+    }
+
+    /// Returns the current world difficulty.
+    pub fn difficulty(&self) -> Difficulty {
+        self.handle.difficulty()
+    }
+
+    /// Sets the world difficulty.
+    pub fn set_difficulty(&self, diff: Difficulty) {
+        self.handle.set_difficulty(diff);
+    }
+
+    /// Creates an explosion at the specified location.
+    pub fn create_explosion(&self, x: f64, y: f64, z: f64, power: f32, fire: bool, break_blocks: bool) {
+        self.handle.create_explosion(x, y, z, power, fire, break_blocks);
+    }
+
+    /// Plays a sound effect at a specific world location.
+    pub fn play_sound(&self, location: &Location, sound: &str, volume: f32, pitch: f32) {
+        self.handle.play_sound(location, sound, volume, pitch);
+    }
+
+    /// Broadcasts a system chat message to all players in this world.
+    pub fn broadcast_message(&self, message: &str) {
+        self.handle.broadcast_message(message);
+    }
+}
+
+impl std::fmt::Debug for World {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("World")
+            .field("identity", &self.identity())
+            .finish()
+    }
+}
+
+impl PartialEq for World {
+    fn eq(&self, other: &Self) -> bool {
+        self.identity() == other.identity()
+    }
+}
+
+impl Eq for World {}

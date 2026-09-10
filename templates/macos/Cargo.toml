@@ -1,0 +1,15 @@
+[package]
+name = "my-potato-plugin-macos"
+version = "0.1.0"
+edition = "2024"
+authors = ["Your Name <you@example.com>"]
+description = "PotatoMC Native Plugin for macOS (.dylib)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+potato-api = { git = "https://github.com/Flaxa-Technologies/potato-api" }
+
+# Optional dependencies:
+# serde = { version = "1.0", features = ["derive"] }

@@ -183,6 +183,8 @@ Pre-configured, production-ready templates are included in the `templates/` fold
 - 🐧 **[Linux Template (`.so`)](templates/linux/)**: Includes `build.sh`, `Makefile`, `Cargo.toml`, and ELF-optimized configuration.
 - 🍎 **[macOS Template (`.dylib`)](templates/macos/)**: Includes `build.sh`, `Cargo.toml`, and universal target setup.
 
+Every template and scaffolded plugin automatically comes bundled with **`AGENT.md`** and **`CLAUDE.md`** containing complete architectural context, documentation links, build commands, and coding rules for AI coding assistants (Cursor, Claude, Copilot, Antigravity, Codex).
+
 ---
 
 ## 📖 Complete Documentation

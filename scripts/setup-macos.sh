@@ -352,6 +352,71 @@ cargo build --release
 Output will be at \`target/release/lib${CRATE_NAME//-/_}.dylib\`.
 EOF
 
+    # Write AGENT.md
+    cat <<EOF > "$TARGET_DIR/AGENT.md"
+# AGENT.md — PotatoMC Native Plugin Development Guide for AI Agents
+
+This file provides critical context and rules for AI coding agents working on this PotatoMC native plugin codebase.
+
+## 1. Project Overview
+- **Engine**: PotatoMC (high-performance Rust Minecraft server)
+- **Plugin Type**: Native dynamic shared library (\`crate-type = ["cdylib"]\`)
+- **Output Binary**: \`target/release/lib${CRATE_NAME//-/_}.dylib\`
+- **Runtime Model**: Executes in-process at native C-ABI speed. Zero JVM pauses, zero JNI overhead.
+
+## 2. API Documentation Links
+Always consult the official PotatoMC API documentation when writing code:
+- **API Repository**: https://github.com/Flaxa-Technologies/potato-api
+- **Documentation Hub**: https://github.com/Flaxa-Technologies/potato-api/tree/main/docs
+- **Lifecycle & Entrypoint**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/LIFECYCLE.md
+- **Event System (26 events)**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/EVENTS.md
+- **Brigadier Commands**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/COMMANDS.md
+- **Adventure Text & MiniMessage**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/TEXT_AND_MINIMESSAGE.md
+- **PDC & ItemStacks**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/PDC_AND_ITEMS.md
+- **Scheduler & Concurrency**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/SCHEDULER.md
+- **YAML Configuration**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/CONFIGURATION.md
+- **BossBar API**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/BOSSBAR.md
+- **Paper to PotatoMC Guide**: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/PAPER_MIGRATION.md
+
+## 3. Build & Check Commands
+- Fast syntax/type check: \`cargo check\`
+- Compile release binary: \`cargo build --release\`
+
+## 4. Agent Coding Rules
+1. Always export entrypoint: \`potato_plugin!($STRUCT_NAME);\` at the end of \`src/lib.rs\`.
+2. Never block the server tick loop with heavy I/O; use \`std::thread::spawn\` for database or HTTP calls.
+3. Event cancellation: Call \`event.set_cancelled(true)\` on \`Cancellable\` events.
+4. Verify code compiles cleanly with \`cargo check\` before finalizing edits.
+EOF
+
+    # Write CLAUDE.md
+    cat <<EOF > "$TARGET_DIR/CLAUDE.md"
+# CLAUDE.md — Instructions for Claude on PotatoMC Native Plugins
+
+## Project Summary
+- Native PotatoMC plugin in Rust (Edition 2024)
+- Target: \`crate-type = ["cdylib"]\` -> \`target/release/lib${CRATE_NAME//-/_}.dylib\`
+- Paper-grade API (MiniMessage, Adventure text, Brigadier trees, PDC, 26 events)
+
+## Commands
+- \`cargo check\` — Check syntax and types.
+- \`cargo build --release\` — Build release .dylib library.
+
+## API Documentation
+- Full Documentation: https://github.com/Flaxa-Technologies/potato-api/tree/main/docs
+- Events: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/EVENTS.md
+- Commands: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/COMMANDS.md
+- Text/MiniMessage: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/TEXT_AND_MINIMESSAGE.md
+- PDC/Items: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/PDC_AND_ITEMS.md
+- Scheduler: https://github.com/Flaxa-Technologies/potato-api/blob/main/docs/SCHEDULER.md
+
+## Rules
+1. Implement \`Plugin\` trait with \`Default\`.
+2. Export C-ABI symbol with \`potato_plugin!($STRUCT_NAME)\`.
+3. Use Adventure \`Component::from_mini_message\` for rich formatting.
+4. Always verify code compiles cleanly with \`cargo check\`.
+EOF
+
     FULL_PATH=$(cd "$TARGET_DIR" && pwd)
     echo ""
     echo "=================================================================="

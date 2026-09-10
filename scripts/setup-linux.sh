@@ -14,7 +14,7 @@ if [ "$(id -u)" -ne 0 ] && command -v sudo &> /dev/null; then
     SUDO="sudo"
 fi
 
-# 1. Detect Package Manager & Install Build Essentials
+# 1. System Build Dependencies
 echo "[1/4] Checking and installing system build dependencies..."
 if command -v apt-get &> /dev/null; then
     $SUDO apt-get update -y
@@ -26,59 +26,91 @@ elif command -v dnf &> /dev/null; then
 else
     echo "[i] Custom Linux distribution detected. Ensure gcc/clang, make, and build essentials are present."
 fi
-echo "[✓] System packages verified."
+echo "[✓] Build dependencies verified."
 
-# 2. Check for existing Cargo / Rust in PATH or standard directories
-echo "[2/4] Checking Rust toolchain..."
+# 2. Check for Cargo / Rust in existing paths
+echo "[2/4] Checking for existing Rust toolchain..."
 
 if ! command -v cargo &> /dev/null; then
-    # Check if cargo was installed previously in standard cargo locations
-    if [ -f "$HOME/.cargo/env" ]; then
-        . "$HOME/.cargo/env"
-    elif [ -f "/usr/local/cargo/env" ]; then
-        . "/usr/local/cargo/env"
-    fi
-
-    if [ -d "$HOME/.cargo/bin" ]; then
-        export PATH="$HOME/.cargo/bin:$PATH"
-    fi
-    if [ -d "/usr/local/cargo/bin" ]; then
-        export PATH="/usr/local/cargo/bin:$PATH"
-    fi
+    for cargo_env in "$HOME/.cargo/env" "/usr/local/cargo/env" "/root/.cargo/env"; do
+        if [ -f "$cargo_env" ]; then
+            . "$cargo_env" 2>/dev/null || true
+        fi
+    done
+    for cargo_bin in "$HOME/.cargo/bin" "/usr/local/cargo/bin" "/root/.cargo/bin"; do
+        if [ -d "$cargo_bin" ]; then
+            export PATH="$cargo_bin:$PATH"
+        fi
+    done
 fi
 
-# If cargo is still not found, download and install via rustup safely (avoiding broken pipes)
-if ! command -v cargo &> /dev/null; then
-    echo "[!] Cargo not found in PATH. Downloading and installing rustup..."
-    TMP_RUSTUP=$(mktemp /tmp/rustup-init.XXXXXX.sh 2>/dev/null || mktemp)
-    
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$TMP_RUSTUP"; then
-        sh "$TMP_RUSTUP" -y --default-toolchain stable --profile default
-        rm -f "$TMP_RUSTUP"
-    else
-        echo "[ERROR] Failed to download rustup installer."
-        rm -f "$TMP_RUSTUP"
-        exit 1
-    fi
-
-    # Load environment
-    if [ -f "$HOME/.cargo/env" ]; then
-        . "$HOME/.cargo/env"
-    fi
-    export PATH="$HOME/.cargo/bin:$PATH"
-fi
-
-# Verify cargo availability
 if command -v cargo &> /dev/null; then
     RUST_VER=$(cargo --version)
-    echo "[✓] Detected: $RUST_VER"
+    echo "[✓] Rust toolchain detected: $RUST_VER"
 else
-    echo "[ERROR] Cargo could not be found or initialized!"
-    echo "Please ensure ~/.cargo/bin is in your PATH, or run: source \$HOME/.cargo/env"
-    exit 1
+    echo ""
+    echo "[!] Cargo / Rust toolchain was not found on your system."
+
+    # Ask user for automatic installation
+    DO_INSTALL="y"
+    if [ -e /dev/tty ]; then
+        read -r -p "Would you like to automatically install Rust and Cargo now? [Y/n]: " USER_CHOICE < /dev/tty || USER_CHOICE="y"
+        if [[ "$USER_CHOICE" =~ ^[Nn] ]]; then
+            DO_INSTALL="n"
+        fi
+    fi
+
+    if [ "$DO_INSTALL" != "y" ]; then
+        echo ""
+        echo "[i] Auto-installation cancelled."
+        echo "Please install Rust manually from: https://rustup.rs/"
+        echo "Then re-run this setup script."
+        exit 0
+    fi
+
+    echo ""
+    echo "[*] Proceeding with automatic Rust installation..."
+
+    INSTALL_SUCCESS=false
+    TMP_INIT="/tmp/rustup-init-$$.sh"
+
+    echo "[i] Downloading rustup installer from https://sh.rustup.rs..."
+    if curl --proto '=https' --tlsv1.2 -sSfL https://sh.rustup.rs -o "$TMP_INIT"; then
+        if sh "$TMP_INIT" -y --default-toolchain stable --profile default; then
+            INSTALL_SUCCESS=true
+        fi
+        rm -f "$TMP_INIT"
+    fi
+
+    # Fallback to distro package manager if rustup download failed
+    if [ "$INSTALL_SUCCESS" = false ]; then
+        echo "[!] rustup installation was unavailable. Attempting package manager fallback..."
+        if command -v apt-get &> /dev/null; then
+            $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y cargo rustc && INSTALL_SUCCESS=true
+        elif command -v pacman &> /dev/null; then
+            $SUDO pacman -S --noconfirm rust && INSTALL_SUCCESS=true
+        elif command -v dnf &> /dev/null; then
+            $SUDO dnf install -y cargo rust && INSTALL_SUCCESS=true
+        fi
+    fi
+
+    # Reload environment
+    if [ -f "$HOME/.cargo/env" ]; then
+        . "$HOME/.cargo/env" 2>/dev/null || true
+    fi
+    export PATH="$HOME/.cargo/bin:$PATH"
+
+    if command -v cargo &> /dev/null; then
+        RUST_VER=$(cargo --version)
+        echo "[✓] Successfully installed: $RUST_VER"
+    else
+        echo "[ERROR] Cargo installation could not be completed automatically."
+        echo "Please install Rust manually via: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        exit 1
+    fi
 fi
 
-# 3. Ensure stable toolchain & components
+# 3. Ensure stable toolchain
 echo "[3/4] Checking Rust toolchain status..."
 if command -v rustup &> /dev/null; then
     rustup default stable 2>/dev/null || true

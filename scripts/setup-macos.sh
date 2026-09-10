@@ -23,7 +23,7 @@ echo "[2/3] Checking Rust toolchain..."
 
 if ! command -v cargo &> /dev/null; then
     if [ -f "$HOME/.cargo/env" ]; then
-        . "$HOME/.cargo/env"
+        . "$HOME/.cargo/env" 2>/dev/null || true
     fi
     if [ -d "$HOME/.cargo/bin" ]; then
         export PATH="$HOME/.cargo/bin:$PATH"
@@ -33,32 +33,50 @@ if ! command -v cargo &> /dev/null; then
     fi
 fi
 
-if ! command -v cargo &> /dev/null; then
-    echo "[!] Cargo not found in PATH! Downloading and installing rustup..."
-    TMP_RUSTUP=$(mktemp /tmp/rustup-init.XXXXXX.sh 2>/dev/null || mktemp)
+if command -v cargo &> /dev/null; then
+    RUST_VER=$(cargo --version)
+    echo "[✓] Rust toolchain detected: $RUST_VER"
+else
+    echo ""
+    echo "[!] Cargo / Rust toolchain was not found on your system."
 
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$TMP_RUSTUP"; then
-        sh "$TMP_RUSTUP" -y --default-toolchain stable --profile default
-        rm -f "$TMP_RUSTUP"
-    else
-        echo "[ERROR] Failed to download rustup installer."
-        rm -f "$TMP_RUSTUP"
-        exit 1
+    # Ask user for automatic installation
+    DO_INSTALL="y"
+    if [ -e /dev/tty ]; then
+        read -r -p "Would you like to automatically install Rust and Cargo now? [Y/n]: " USER_CHOICE < /dev/tty || USER_CHOICE="y"
+        if [[ "$USER_CHOICE" =~ ^[Nn] ]]; then
+            DO_INSTALL="n"
+        fi
+    fi
+
+    if [ "$DO_INSTALL" != "y" ]; then
+        echo ""
+        echo "[i] Auto-installation cancelled. Please install Rust from https://rustup.rs/"
+        exit 0
+    fi
+
+    echo "[*] Downloading and installing rustup..."
+    TMP_INIT="/tmp/rustup-init-$$.sh"
+    if curl --proto '=https' --tlsv1.2 -sSfL https://sh.rustup.rs -o "$TMP_INIT"; then
+        sh "$TMP_INIT" -y --default-toolchain stable --profile default
+        rm -f "$TMP_INIT"
+    elif command -v brew &> /dev/null; then
+        echo "[!] rustup download failed. Installing via Homebrew..."
+        brew install rust
     fi
 
     if [ -f "$HOME/.cargo/env" ]; then
-        . "$HOME/.cargo/env"
+        . "$HOME/.cargo/env" 2>/dev/null || true
     fi
     export PATH="$HOME/.cargo/bin:$PATH"
-fi
 
-if command -v cargo &> /dev/null; then
-    RUST_VER=$(cargo --version)
-    echo "[✓] Using: $RUST_VER"
-else
-    echo "[ERROR] Cargo could not be found or initialized!"
-    echo "Please run: source \$HOME/.cargo/env"
-    exit 1
+    if command -v cargo &> /dev/null; then
+        RUST_VER=$(cargo --version)
+        echo "[✓] Rust installed successfully: $RUST_VER"
+    else
+        echo "[ERROR] Cargo could not be found in PATH after install."
+        exit 1
+    fi
 fi
 
 # 3. Add Apple Silicon & Intel Targets

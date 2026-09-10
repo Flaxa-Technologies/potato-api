@@ -117,16 +117,329 @@ if command -v rustup &> /dev/null; then
     echo "[✓] Default toolchain set to stable."
 fi
 
-# 4. Summary & Instructions
-echo "[4/4] Setup complete!"
+# 4. Interactive Scaffolding
+echo "[4/4] Environment ready!"
 echo "=================================================================="
-echo "  PotatoMC Linux Native Plugin Development Environment is Ready! "
+echo "  PotatoMC Linux Native Plugin Development Environment is Ready!  "
 echo "=================================================================="
 echo ""
-echo "To scaffold a new plugin:"
-echo "  ./scripts/create-plugin.sh my-cool-plugin \"Your Name\" linux"
-echo ""
-echo "Or build the included Linux template:"
-echo "  cd templates/linux"
-echo "  ./build.sh"
-echo "=================================================================="
+
+DO_SCAFFOLD="y"
+if [ -e /dev/tty ]; then
+    read -r -p "Would you like to set up a new plugin template here now? [Y/n]: " WANT_SCAFFOLD < /dev/tty || WANT_SCAFFOLD="y"
+    if [[ "$WANT_SCAFFOLD" =~ ^[Nn] ]]; then
+        DO_SCAFFOLD="n"
+    fi
+fi
+
+if [ "$DO_SCAFFOLD" = "y" ]; then
+    PLUGIN_NAME="MyPotatoPlugin"
+    PLUGIN_AUTHOR="Developer"
+    TARGET_DIR="."
+
+    if [ -e /dev/tty ]; then
+        read -r -p "Enter Plugin Name [default: MyPotatoPlugin]: " INPUT_NAME < /dev/tty || INPUT_NAME=""
+        if [ -n "$INPUT_NAME" ]; then
+            PLUGIN_NAME="$INPUT_NAME"
+        fi
+
+        read -r -p "Enter Author Name [default: Developer]: " INPUT_AUTHOR < /dev/tty || INPUT_AUTHOR=""
+        if [ -n "$INPUT_AUTHOR" ]; then
+            PLUGIN_AUTHOR="$INPUT_AUTHOR"
+        fi
+
+        read -r -p "Create in current directory '.' or new subfolder './$PLUGIN_NAME'? [1=Current dir, 2=Subfolder] (Default: 1): " DIR_CHOICE < /dev/tty || DIR_CHOICE="1"
+        if [ "$DIR_CHOICE" = "2" ]; then
+            TARGET_DIR="./$PLUGIN_NAME"
+        fi
+    fi
+
+    CRATE_NAME=$(echo "$PLUGIN_NAME" | tr '[:upper:]' '[:lower:]' | tr '_' '-')
+    STRUCT_NAME=$(echo "$PLUGIN_NAME" | tr '-' '_')
+    CMD_NAME=$(echo "$CRATE_NAME" | cut -c 1-8)
+
+    mkdir -p "$TARGET_DIR/src"
+
+    # Write Cargo.toml
+    cat <<EOF > "$TARGET_DIR/Cargo.toml"
+[package]
+name = "$CRATE_NAME"
+version = "0.1.0"
+edition = "2024"
+authors = ["$PLUGIN_AUTHOR"]
+description = "Native Linux PotatoMC Plugin (.so)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+potato-api = { git = "https://github.com/Flaxa-Technologies/potato-api" }
+EOF
+
+    # Write src/lib.rs with all Paper APIs
+    cat <<EOF > "$TARGET_DIR/src/lib.rs"
+use std::time::Duration;
+use potato_api::bossbar::{BossBar, BossBarColor, BossBarStyle};
+use potato_api::command::{Argument, Command, CommandContext, CommandResult, CommandSender};
+use potato_api::event::{
+    BlockBreakEvent, Cancellable, PlayerChatEvent, PlayerInteractEvent, PlayerJoinEvent,
+};
+use potato_api::plugin::{Plugin, PluginContext, PluginMetadata};
+use potato_api::potato_plugin;
+use potato_api::text::{Component, NamedTextColor};
+use potato_api::types::{ItemStack, PersistentDataContainer};
+
+#[derive(Default)]
+pub struct $STRUCT_NAME;
+
+impl Plugin for $STRUCT_NAME {
+    fn metadata(&self) -> PluginMetadata {
+        PluginMetadata::new("$PLUGIN_NAME", "1.0.0")
+            .author("$PLUGIN_AUTHOR")
+            .description("Official Paper-grade Native Linux PotatoMC Plugin (.so)")
+    }
+
+    fn on_load(&self, context: &PluginContext) -> Result<(), String> {
+        context.logger().info("$PLUGIN_NAME loaded on Linux!");
+        let default_cfg = r#"# $PLUGIN_NAME Configuration
+server:
+  welcome_message: "<gradient:#00ffaa:#00aaff><bold>Welcome, {player}!</bold></gradient> Running on PotatoMC!"
+  tab_header: "<aqua><bold>PotatoMC Linux Server</bold></aqua>"
+  tab_footer: "<gray>Paper-grade Native Plugin (.so)</gray>"
+features:
+  protect_bedrock: true
+"#;
+        let _ = context.save_default_config(default_cfg);
+        Ok(())
+    }
+
+    fn on_enable(&self, context: &PluginContext) -> Result<(), String> {
+        let logger = context.logger();
+        logger.info("$PLUGIN_NAME enabling at native speed...");
+
+        let config = context.config();
+        let welcome_template = config.get_string_or(
+            "server.welcome_message",
+            "Welcome, {player}! Running on PotatoMC!",
+        );
+        let tab_header = config.get_string_or("server.tab_header", "<aqua>PotatoMC</aqua>");
+        let tab_footer = config.get_string_or("server.tab_footer", "<gray>Native Linux .so</gray>");
+        let protect_bedrock = config.get_bool_or("features.protect_bedrock", true);
+
+        // 1. PlayerJoinEvent
+        let join_template = welcome_template.clone();
+        let header_str = tab_header.clone();
+        let footer_str = tab_footer.clone();
+        context.register_event(move |event: &mut PlayerJoinEvent| {
+            let player = &event.player;
+            let player_name = player.name();
+
+            let formatted = join_template.replace("{player}", &player_name);
+            let component = Component::from_mini_message(&formatted);
+            player.send_component(&component);
+
+            let h = Component::from_mini_message(&header_str);
+            let f = Component::from_mini_message(&footer_str);
+            player.set_player_list_header_footer(&h.to_legacy_string(), &f.to_legacy_string());
+        });
+
+        // 2. BlockBreakEvent: prevent breaking bedrock
+        if protect_bedrock {
+            context.register_event(move |event: &mut BlockBreakEvent| {
+                if event.block.block_type == "minecraft:bedrock" {
+                    event.set_cancelled(true);
+                    if let Some(ref player) = event.player {
+                        player.send_message("§cYou cannot break bedrock!");
+                    }
+                }
+            });
+        }
+
+        // 3. PlayerInteractEvent
+        context.register_event(move |event: &mut PlayerInteractEvent| {
+            if let Some(ref block) = event.clicked_block {
+                if block.block_type == "minecraft:emerald_block" {
+                    event.player.send_message("§a✨ You tapped an Emerald Block!");
+                }
+            }
+        });
+
+        // 4. Brigadier Commands
+        let cmd = Command::tree("$CMD_NAME")
+            .description("Command provided by $PLUGIN_NAME")
+            .subcommand(
+                Command::tree("greet")
+                    .argument(Argument::word("target"))
+                    .executes(|ctx: &CommandContext| -> CommandResult {
+                        let target = ctx.get_string("target").unwrap_or("Friend");
+                        let comp = Component::text("Hello, ")
+                            .color(NamedTextColor::Aqua)
+                            .append(Component::text(target).color(NamedTextColor::Gold).bold())
+                            .append(Component::text(" from Linux native plugin!"));
+
+                        match ctx.sender() {
+                            CommandSender::Player(p) => p.send_component(&comp),
+                            CommandSender::Console(c) => c.send_message(&comp.to_plain_text()),
+                        }
+                        Ok(())
+                    }),
+            )
+            .subcommand(
+                Command::tree("item")
+                    .executes(|ctx: &CommandContext| -> CommandResult {
+                        let mut item = ItemStack::new("minecraft:diamond_sword", 1);
+                        item.set_custom_name("§b§lLinux Cleaver");
+                        item.add_lore("§7Native Linux .so item");
+                        item.add_enchantment("minecraft:sharpness", 5);
+
+                        let mut pdc = PersistentDataContainer::new();
+                        pdc.set_string("rpg:kernel", "Linux");
+                        item.set_pdc(pdc);
+
+                        ctx.sender().send_message(&format!(
+                            "§aCreated item '{}' with PDC rarity: {:?}",
+                            item.custom_name.as_deref().unwrap_or(""),
+                            item.pdc().get_string("rpg:kernel")
+                        ));
+                        Ok(())
+                    }),
+            )
+            .subcommand(
+                Command::tree("bossbar")
+                    .executes(|ctx: &CommandContext| -> CommandResult {
+                        let bar = BossBar::new(
+                            "§b§lLinux Cluster Guardian",
+                            BossBarColor::Blue,
+                            BossBarStyle::Notched12,
+                        ).with_progress(0.90);
+
+                        ctx.sender().send_message(&format!("§aCreated BossBar '{}'", bar.title));
+                        Ok(())
+                    }),
+            )
+            .executes(|ctx: &CommandContext| -> CommandResult {
+                ctx.sender().send_message("§eUsage: /$CMD_NAME <greet <target> | item | bossbar>");
+                Ok(())
+            });
+
+        context.register_command(cmd);
+
+        // 5. Scheduler
+        let setup_logger = context.logger().clone();
+        context.scheduler().run_task_later(Duration::from_secs(5), move || {
+            setup_logger.info("Delayed 5-second task executed on Linux main thread.");
+        });
+
+        let timer_logger = context.logger().clone();
+        let _ = context.scheduler().run_task_repeating(
+            Duration::from_secs(60),
+            Duration::from_secs(60),
+            move || {
+                timer_logger.debug("Periodic heartbeat tick.");
+            },
+        );
+
+        let async_logger = context.logger().clone();
+        std::thread::spawn(move || {
+            async_logger.info("Async worker thread running on Linux thread pool!");
+        });
+
+        logger.info("$PLUGIN_NAME enabled successfully on Linux (.so)!");
+        Ok(())
+    }
+
+    fn on_disable(&self, context: &PluginContext) -> Result<(), String> {
+        context.logger().info("$PLUGIN_NAME disabled.");
+        Ok(())
+    }
+}
+
+potato_plugin!($STRUCT_NAME);
+EOF
+
+    # Write build.sh
+    cat <<EOF > "$TARGET_DIR/build.sh"
+#!/usr/bin/env bash
+set -e
+echo "Building $PLUGIN_NAME (.so)..."
+cargo build --release
+SO_FILE="target/release/lib${CRATE_NAME//-/_}.so"
+if [ -f "\$SO_FILE" ]; then
+    echo "[✓] Successfully built: \$SO_FILE"
+    if [ -d "../../plugins" ]; then
+        cp -f "\$SO_FILE" "../../plugins/"
+        echo "Deployed to ../../plugins/"
+    fi
+fi
+EOF
+    chmod +x "$TARGET_DIR/build.sh"
+
+    # Write Makefile
+    cat <<EOF > "$TARGET_DIR/Makefile"
+.PHONY: build release clean
+
+release:
+	cargo build --release
+
+build:
+	cargo build
+
+clean:
+	cargo clean
+EOF
+
+    # Write .gitignore
+    cat <<EOF > "$TARGET_DIR/.gitignore"
+/target/
+Cargo.lock
+*.so
+*.dll
+*.dylib
+*.pdb
+EOF
+
+    # Write README.md
+    cat <<EOF > "$TARGET_DIR/README.md"
+# $PLUGIN_NAME
+
+Official Paper-grade Native Linux Plugin for PotatoMC.
+
+## Building
+\`\`\`bash
+cargo build --release
+\`\`\`
+Or run:
+\`\`\`bash
+./build.sh
+\`\`\`
+The compiled shared library will be generated at:
+\`target/release/lib${CRATE_NAME//-/_}.so\`
+
+Copy this \`.so\` file into your PotatoMC server's \`plugins/\` folder.
+EOF
+
+    FULL_PATH=$(cd "$TARGET_DIR" && pwd)
+    echo ""
+    echo "=================================================================="
+    echo "  [✓] Plugin '$PLUGIN_NAME' successfully initialized!"
+    echo "  Location: $FULL_PATH"
+    echo "=================================================================="
+    echo ""
+    echo "To compile your native Linux plugin (.so) right now:"
+    if [ "$TARGET_DIR" != "." ]; then
+        echo "  cd $TARGET_DIR"
+    fi
+    echo "  cargo build --release"
+    echo ""
+    echo "Your compiled shared library will be produced at:"
+    echo "  target/release/lib${CRATE_NAME//-/_}.so"
+    echo "=================================================================="
+else
+    echo "=================================================================="
+    echo "  Environment configured! Ready to build PotatoMC plugins.        "
+    echo "=================================================================="
+    echo "To initialize a plugin later:"
+    echo "  curl -sSL https://raw.githubusercontent.com/Flaxa-Technologies/potato-api/main/scripts/create-plugin.sh | bash"
+    echo "=================================================================="
+fi
+

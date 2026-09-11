@@ -3,6 +3,7 @@ use crate::types::GameMode;
 
 /// Client Game Event identifiers matching vanilla Minecraft CGameEvent packet.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum GameEvent {
     NoRespawnBlockAvailable = 0,
     StartRaining = 1,

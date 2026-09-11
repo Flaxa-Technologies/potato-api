@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use serde::{Deserialize, Serialize};
 
 /// A 3-dimensional vector of floating-point numbers.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -257,7 +258,7 @@ impl Block {
 }
 
 /// Minecraft player game mode.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum GameMode {
     Survival,
     Creative,

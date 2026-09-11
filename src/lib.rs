@@ -4,6 +4,7 @@ pub mod config;
 pub mod context;
 pub mod entity;
 pub mod event;
+pub mod gui;
 pub mod host;
 pub mod player;
 pub mod plugin;
@@ -18,16 +19,17 @@ pub use command::{
     CommandSender,
 };
 pub use config::Config;
-pub use context::{Logger, PluginContext};
+pub use context::{Logger, PluginContext, Server};
 pub use entity::{Entity, LivingEntity};
 pub use event::*;
+pub use gui::Gui;
 pub use player::Player;
 pub use plugin::{Plugin, PluginMetadata};
 pub use scheduler::{Scheduler, TaskHandle};
 pub use text::{Component, NamedTextColor, TextDecoration};
 pub use types::{
     Block, Difficulty, EquipmentSlot, GameMode, HostInventory, Inventory, ItemStack, Location,
-    PersistentDataContainer, Vector3,
+    PersistentDataContainer, PotionEffect, Vector3,
 };
 pub use uuid::Uuid;
 pub use world::World;
@@ -333,4 +335,64 @@ tags:
         assert!(item.persistent_data.has("custom_id"));
         assert!(!item.persistent_data.has("unknown_key"));
     }
+
+    #[test]
+    fn test_block_normalization_and_helpers() {
+        let b1 = Block::new("grass_block", 10);
+        assert_eq!(b1.block_type, "minecraft:grass_block");
+        assert_eq!(b1.name(), "grass_block");
+        assert_eq!(b1.namespaced_id(), "minecraft:grass_block");
+        assert!(b1.is_type("grass_block"));
+        assert!(b1.is_type("minecraft:grass_block"));
+        assert!(!b1.is_type("dirt"));
+
+        let b2 = Block::new("minecraft:dirt", 20);
+        assert_eq!(b2.name(), "dirt");
+        assert!(b2.is_type("dirt"));
+        assert!(b2.is_type("minecraft:dirt"));
+    }
+
+    #[test]
+    fn test_block_break_event_drop_items() {
+        let mut event = BlockBreakEvent {
+            player: None,
+            block: Block::new("minecraft:dirt", 1),
+            location: Location::new("minecraft:overworld", 0.0, 64.0, 0.0, 0.0, 0.0),
+            drop_items: true,
+            cancelled: false,
+        };
+        assert!(event.drop_items());
+        event.set_drop_items(false);
+        assert!(!event.drop_items());
+    }
+
+    #[test]
+    fn test_gui_builder() {
+        let mut gui = Gui::chest("Custom Shop", 3);
+        assert_eq!(gui.size, 27);
+        assert_eq!(gui.title, "Custom Shop");
+        assert_eq!(gui.get_item(0), None);
+
+        let item = ItemStack::new("minecraft:diamond", 64);
+        gui.set_item(13, Some(item.clone()));
+        assert_eq!(gui.get_item(13), Some(&item));
+
+        gui.allow_grab(false).allow_put(false);
+        assert!(!gui.allow_grab_items);
+        assert!(!gui.allow_put_items);
+    }
+
+    #[test]
+    fn test_potion_effects() {
+        let effect = PotionEffect::new("speed", 200, 1)
+            .with_ambient(true)
+            .with_particles(false);
+        assert_eq!(effect.effect_type, "minecraft:speed");
+        assert_eq!(effect.name(), "speed");
+        assert_eq!(effect.duration_ticks, 200);
+        assert_eq!(effect.amplifier, 1);
+        assert!(effect.ambient);
+        assert!(!effect.particles);
+    }
 }
+

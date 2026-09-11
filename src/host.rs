@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::types::{Block, Difficulty, GameMode, Location, Vector3};
+use crate::types::{Block, Difficulty, GameMode, ItemStack, Location, PotionEffect, Vector3};
 pub use crate::types::HostInventory;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,6 +46,16 @@ pub trait HostPlayer: Send + Sync {
     fn play_sound(&self, sound: &str, volume: f32, pitch: f32);
     fn kick(&self, reason: &str);
     fn set_player_list_header_footer(&self, header: &str, footer: &str);
+
+    fn drop_item(&self, _item: &ItemStack) {}
+    fn give_item(&self, _item: &ItemStack) -> bool { false }
+    fn open_gui(&self, _title: &str, _size: usize, _items: &[(usize, ItemStack)], _allow_grab: bool, _allow_put: bool) -> u8 { 0 }
+    fn close_inventory(&self) {}
+    fn add_potion_effect(&self, _effect: &PotionEffect) {}
+    fn remove_potion_effect(&self, _effect_type: &str) {}
+    fn clear_potion_effects(&self) {}
+    fn has_potion_effect(&self, _effect_type: &str) -> bool { false }
+    fn spawn_particle(&self, _particle: &str, _location: &Location, _count: u32, _offset_x: f64, _offset_y: f64, _offset_z: f64, _speed: f32) {}
 }
 
 pub trait HostWorld: Send + Sync {
@@ -65,6 +75,15 @@ pub trait HostWorld: Send + Sync {
     fn create_explosion(&self, x: f64, y: f64, z: f64, power: f32, fire: bool, break_blocks: bool);
     fn play_sound(&self, location: &Location, sound: &str, volume: f32, pitch: f32);
     fn broadcast_message(&self, message: &str);
+
+    fn drop_item(&self, _location: &Location, _item: &ItemStack) {}
+    fn drop_item_naturally(&self, location: &Location, item: &ItemStack) {
+        self.drop_item(location, item);
+    }
+    fn break_block(&self, x: i32, y: i32, z: i32, _drop_items: bool) -> bool {
+        self.set_block(x, y, z, &Block::new("minecraft:air", 0))
+    }
+    fn spawn_particle(&self, _particle: &str, _location: &Location, _count: u32, _offset_x: f64, _offset_y: f64, _offset_z: f64, _speed: f32) {}
 }
 
 pub trait HostEntity: Send + Sync {
@@ -121,4 +140,8 @@ pub trait HostContext: Send + Sync {
 
     fn broadcast(&self, message: &str);
     fn server_version(&self) -> &str;
+
+    fn get_tps(&self) -> f64 { 20.0 }
+    fn max_players(&self) -> u32 { 100 }
+    fn dispatch_command(&self, _command: &str) -> bool { false }
 }

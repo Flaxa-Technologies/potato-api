@@ -72,16 +72,36 @@ pub struct Block {
 
 impl Block {
     pub fn new(block_type: impl Into<String>, state_id: u32) -> Self {
+        let mut bt = block_type.into();
+        if !bt.contains(':') {
+            bt = format!("minecraft:{}", bt);
+        }
         Self {
-            block_type: block_type.into(),
+            block_type: bt,
             state_id,
         }
     }
 
     pub fn is_air(&self) -> bool {
-        self.block_type == "minecraft:air"
-            || self.block_type == "minecraft:cave_air"
-            || self.block_type == "minecraft:void_air"
+        self.is_type("air") || self.is_type("cave_air") || self.is_type("void_air")
+    }
+
+    /// Checks if this block matches the specified name, regardless of whether
+    /// a "minecraft:" namespace prefix is provided in the query.
+    pub fn is_type(&self, query: &str) -> bool {
+        let clean_self = self.block_type.strip_prefix("minecraft:").unwrap_or(&self.block_type);
+        let clean_query = query.strip_prefix("minecraft:").unwrap_or(query);
+        clean_self.eq_ignore_ascii_case(clean_query)
+    }
+
+    /// Returns the simple unnamespaced block name (e.g. "dirt", "grass_block").
+    pub fn name(&self) -> &str {
+        self.block_type.strip_prefix("minecraft:").unwrap_or(&self.block_type)
+    }
+
+    /// Returns the full namespaced block identifier (e.g. "minecraft:dirt").
+    pub fn namespaced_id(&self) -> &str {
+        &self.block_type
     }
 }
 
@@ -395,3 +415,57 @@ impl Inventory {
         self.handle.clear();
     }
 }
+
+/// Represents an active or applicable potion status effect (e.g. speed, regeneration).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PotionEffect {
+    /// Namespaced or simple identifier of the effect (e.g. "minecraft:speed" or "speed").
+    pub effect_type: String,
+    /// Duration of the effect in game ticks (20 ticks = 1 second).
+    pub duration_ticks: u32,
+    /// Effect amplifier level (0 = Level I, 1 = Level II, etc.).
+    pub amplifier: u8,
+    /// Whether this is an ambient beacon/conduit effect.
+    pub ambient: bool,
+    /// Whether particles should be displayed around the entity.
+    pub particles: bool,
+    /// Whether the status icon should be displayed on screen.
+    pub show_icon: bool,
+}
+
+impl PotionEffect {
+    pub fn new(effect_type: impl Into<String>, duration_ticks: u32, amplifier: u8) -> Self {
+        let mut et = effect_type.into();
+        if !et.contains(':') {
+            et = format!("minecraft:{}", et);
+        }
+        Self {
+            effect_type: et,
+            duration_ticks,
+            amplifier,
+            ambient: false,
+            particles: true,
+            show_icon: true,
+        }
+    }
+
+    pub fn with_ambient(mut self, ambient: bool) -> Self {
+        self.ambient = ambient;
+        self
+    }
+
+    pub fn with_particles(mut self, particles: bool) -> Self {
+        self.particles = particles;
+        self
+    }
+
+    pub fn with_icon(mut self, show_icon: bool) -> Self {
+        self.show_icon = show_icon;
+        self
+    }
+
+    pub fn name(&self) -> &str {
+        self.effect_type.strip_prefix("minecraft:").unwrap_or(&self.effect_type)
+    }
+}
+

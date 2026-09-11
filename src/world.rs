@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::entity::Entity;
 use crate::host::HostWorld;
 use crate::player::Player;
-use crate::types::{Block, Difficulty, Location};
+use crate::types::{Block, Difficulty, ItemStack, Location};
 
 /// Safe abstraction representing a loaded dimension/world on the PotatoMC server.
 #[derive(Clone)]
@@ -99,6 +99,33 @@ impl World {
     /// Broadcasts a system chat message to all players in this world.
     pub fn broadcast_message(&self, message: &str) {
         self.handle.broadcast_message(message);
+    }
+
+    /// Drops an item stack into this world at the specified location.
+    pub fn drop_item(&self, location: &Location, item: &ItemStack) {
+        self.handle.drop_item(location, item);
+    }
+
+    /// Drops an item stack into this world at the specified location with slight randomized velocity.
+    pub fn drop_item_naturally(&self, location: &Location, item: &ItemStack) {
+        self.handle.drop_item_naturally(location, item);
+    }
+
+    /// Breaks the block at the specified coordinate, optionally dropping its vanilla items.
+    pub fn break_block(&self, x: i32, y: i32, z: i32, drop_items: bool) -> bool {
+        self.handle.break_block(x, y, z, drop_items)
+    }
+
+    /// Spawns particle effects at the specified location in this world.
+    pub fn spawn_particle(
+        &self,
+        particle: &str,
+        location: &Location,
+        count: u32,
+        offset: (f64, f64, f64),
+        speed: f32,
+    ) {
+        self.handle.spawn_particle(particle, location, count, offset.0, offset.1, offset.2, speed);
     }
 }
 

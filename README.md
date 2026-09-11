@@ -192,7 +192,9 @@ Every template and scaffolded plugin automatically comes bundled with **`AGENT.m
 Explore the complete API reference in the [`docs/`](docs/) directory:
 
 - 🏗️ **[Plugin Lifecycle & Architecture](docs/LIFECYCLE.md)**
-- ⚡ **[Event System & 26-Event Catalog](docs/EVENTS.md)**
+- ⚡ **[Event System & 27-Event Catalog](docs/EVENTS.md)** (with Block Break loot suppression)
+- 🪟 **[Virtual GUI & Inventory API](docs/GUI_AND_INVENTORY.md)** (Chest GUIs, slot control, inventory manipulation)
+- 🧪 **[Potions & Particle Effects](docs/POTIONS_AND_PARTICLES.md)** (Status effects builder and particle broadcasts)
 - 🌲 **[Brigadier Command Tree API](docs/COMMANDS.md)**
 - 🎨 **[Adventure Text & MiniMessage](docs/TEXT_AND_MINIMESSAGE.md)**
 - 📦 **[Persistent Data Container (PDC) & Items](docs/PDC_AND_ITEMS.md)**

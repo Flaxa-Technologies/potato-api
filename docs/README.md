@@ -29,47 +29,60 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
 
 2. **[Event System & Cancellable](EVENTS.md)**
    - Publisher / Observer pattern
-   - Complete 26-event catalog (IDs 1–26)
+   - Complete 27-event catalog (IDs 1–27)
+   - Block break loot suppression via `set_drop_items(false)`
    - `Cancellable` trait & stopping vanilla actions
    - `EventPriority` ordering (`Lowest` to `Monitor`)
 
-3. **[Brigadier Command API](COMMANDS.md)**
+3. **[Virtual GUI & Inventory API](GUI_AND_INVENTORY.md)**
+   - Fluent chest GUI builder (`Gui::chest(title, rows)`)
+   - Slot mapping, custom borders, and interaction flags (`allow_grab`, `allow_put`)
+   - `player.open_gui(&gui)` and `player.close_inventory()`
+   - Event handling with `InventoryClickEvent`
+   - Giving and dropping items (`player.give_item`, `player.drop_item`, `world.drop_item`)
+
+4. **[Potions & Particle Effects](POTIONS_AND_PARTICLES.md)**
+   - Fluent `PotionEffect` builder
+   - Managing player status effects (`add_potion_effect`, `has_potion_effect`, `clear_potion_effects`)
+   - Particle effect broadcasts (`world.spawn_particle`, `player.spawn_particle`)
+
+5. **[Brigadier Command API](COMMANDS.md)**
    - Tree-based fluent command builders (`Command::tree`)
    - Subcommands and argument parsing (`word`, `string`, `int`, `float`, `bool`, `player`)
    - `CommandSender` (Player vs Console handling)
    - Dynamic tab suggestions
 
-4. **[Adventure Text & MiniMessage](TEXT_AND_MINIMESSAGE.md)**
+6. **[Adventure Text & MiniMessage](TEXT_AND_MINIMESSAGE.md)**
    - Adventure `Component` architecture
    - MiniMessage tag syntax (`<gradient>`, `<bold>`, hex colors)
    - Action bars & animated titles
    - Custom Tab List Header & Footer (`Player#set_player_list_header_footer`)
 
-5. **[Persistent Data Container (PDC) & Items](PDC_AND_ITEMS.md)**
+7. **[Persistent Data Container (PDC) & Items](PDC_AND_ITEMS.md)**
    - Attaching arbitrary typed metadata to items (`strings`, `ints`, `longs`, `bytes`)
    - `ItemStack` builder, lore, and custom names
    - Custom enchantments (`add_enchantment`, `get_enchantment_level`)
 
-6. **[Scheduler & Concurrency](SCHEDULER.md)**
+8. **[Scheduler & Concurrency](SCHEDULER.md)**
    - Main-thread tick synchronization
    - Delayed tasks (`run_task_later`)
    - Repeating interval tasks (`run_task_repeating`)
    - Asynchronous off-thread background worker threads
 
-7. **[Configuration API](CONFIGURATION.md)**
+9. **[Configuration API](CONFIGURATION.md)**
    - YAML configuration file loader (`config.yml`)
    - Dot-notation queries (`server.motd`, `features.pvp`)
    - Type-safe getters with fallbacks (`get_string_or`, `get_int_or`, `get_bool_or`)
    - Bundling default configuration files
 
-8. **[BossBar API](BOSSBAR.md)**
-   - Creating Adventure-compatible BossBars
-   - Colors and division overlay styles
-   - Real-time progress updates
+10. **[BossBar API](BOSSBAR.md)**
+    - Creating Adventure-compatible BossBars
+    - Colors and division overlay styles
+    - Real-time progress updates
 
-9. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
-   - Side-by-side Java vs. Rust code translations
-   - Differences in threading and memory models
+11. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
+    - Side-by-side Java vs. Rust code translations
+    - Differences in threading and memory models
 
 ---
 
@@ -99,4 +112,3 @@ Install the development environment directly from your terminal:
 - **Bug Reports & Issues**:
   Report on Discord in `#bugs-support` or open an issue on [**GitHub Issues**](https://github.com/Flaxa-Technologies/potato-api/issues).
 - **Official Website**: [**https://potatomc.flaxa.in/**](https://potatomc.flaxa.in/)
-

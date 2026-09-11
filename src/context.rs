@@ -160,6 +160,58 @@ impl PluginContext {
     pub fn server_version(&self) -> &str {
         self.host.server_version()
     }
+
+    /// Accesses the server management and query interface (Paper's `Bukkit.getServer()`).
+    pub fn server(&self) -> Server {
+        Server::new(self.host.clone())
+    }
+}
+
+/// Safe abstraction representing the Minecraft Server instance (Paper's `Bukkit.getServer()`).
+#[derive(Clone)]
+pub struct Server {
+    host: Arc<dyn HostContext>,
+}
+
+impl Server {
+    pub fn new(host: Arc<dyn HostContext>) -> Self {
+        Self { host }
+    }
+
+    /// Returns the current server tick rate (target 20.0 TPS).
+    pub fn tps(&self) -> f64 {
+        self.host.get_tps()
+    }
+
+    /// Returns the maximum player slots configured on the server.
+    pub fn max_players(&self) -> u32 {
+        self.host.max_players()
+    }
+
+    /// Returns a list of all currently connected players.
+    pub fn online_players(&self) -> Vec<Player> {
+        self.host.get_online_players().into_iter().map(Player::from_handle).collect()
+    }
+
+    /// Dispatches a command line as the server console.
+    pub fn dispatch_command(&self, command: &str) -> bool {
+        self.host.dispatch_command(command)
+    }
+
+    /// Broadcasts a chat message to all connected players.
+    pub fn broadcast(&self, message: &str) {
+        self.host.broadcast(message);
+    }
+
+    /// Broadcasts a rich Adventure text component to all connected players.
+    pub fn broadcast_component(&self, component: &crate::text::Component) {
+        self.host.broadcast(&component.to_legacy_string());
+    }
+
+    /// Returns the server version string.
+    pub fn version(&self) -> &str {
+        self.host.server_version()
+    }
 }
 
 struct EventAdapter<E: Event, H: EventHandler<E>> {

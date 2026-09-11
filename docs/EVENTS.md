@@ -1,6 +1,6 @@
 # Event System & Cancellation
 
-The PotatoMC event system implements a type-safe publisher/observer pattern mirroring Bukkit/Paper.
+The PotatoMC event system implements a type-safe publisher/observer pattern mirroring Paper and Bukkit, with zero JVM runtime penalties and sub-millisecond execution.
 
 ---
 
@@ -21,7 +21,7 @@ context.register_event(|event: &mut PlayerJoinEvent| {
 
 // 2. Prevent breaking bedrock
 context.register_event(|event: &mut BlockBreakEvent| {
-    if event.block.block_type == "minecraft:bedrock" {
+    if event.block.is_type("minecraft:bedrock") {
         event.set_cancelled(true);
         if let Some(ref player) = event.player {
             player.send_message("§cBedrock is indestructible!");
@@ -32,7 +32,36 @@ context.register_event(|event: &mut BlockBreakEvent| {
 
 ---
 
-## 2. Event Priorities
+## 2. Controlling Block Drops (`BlockBreakEvent`)
+
+Like Paper's `BlockBreakEvent.setDropItems(boolean)`, PotatoMC allows plugins to suppress default block loot while still allowing the block to break. This is the foundation for lucky blocks, custom ore mining, and OP-block plugins:
+
+```rust
+use potato_api::event::{BlockBreakEvent, Cancellable};
+use potato_api::types::ItemStack;
+
+context.register_event(|event: &mut BlockBreakEvent| {
+    // Check if the broken block is dirt or grass
+    if event.block.is_type("dirt") || event.block.is_type("grass_block") {
+        // Prevent vanilla dirt from dropping
+        event.set_drop_items(false);
+
+        // Give or drop custom OP loot instead!
+        if let Some(ref player) = event.player {
+            let mut reward = ItemStack::new("minecraft:diamond", 2);
+            reward.set_custom_name("§b§lLucky Diamond");
+            player.give_item(&reward);
+        }
+    }
+});
+```
+
+- `event.drop_items()`: Returns `true` if vanilla loot will drop when the block breaks.
+- `event.set_drop_items(false)`: Tells PotatoMC to skip vanilla block drops (`BlockFlags::SKIP_DROPS`), while allowing the break itself to complete.
+
+---
+
+## 3. Event Priorities
 
 Event listeners execute in strict priority order. The earlier an event handler executes, the sooner it can inspect or cancel an event:
 
@@ -45,7 +74,7 @@ Event listeners execute in strict priority order. The earlier an event handler e
 
 ---
 
-## 3. The `Cancellable` Trait
+## 4. The `Cancellable` Trait
 
 Events that can be prevented implement the `Cancellable` trait:
 
@@ -56,37 +85,38 @@ pub trait Cancellable {
 }
 ```
 
-Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying action (e.g. block breaking, teleportation, player chat, inventory interaction).
+Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying action (e.g. block breaking, block placing, teleportation, player chat, inventory interaction).
 
 ---
 
-## 4. Complete 26-Event Catalog
+## 5. Complete 27-Event Catalog
 
-| ID | Event Struct | Cancellable | Description & Fields |
-|---|---|:---:|---|
-| **1** | `ServerStartedEvent` | No | Server is ready and accepting connections. |
-| **2** | `ServerStoppingEvent` | No | Server is initiating shutdown sequence. |
-| **3** | `PlayerJoinEvent` | No | Player spawned in world: `player: Player`. |
-| **4** | `PlayerQuitEvent` | No | Player disconnected: `player: Player`. |
-| **5** | `PlayerChatEvent` | **Yes** | Player sent message: `player: Player`, `message: String`. |
-| **6** | `PlayerMoveEvent` | **Yes** | Player movement: `player: Player`, `from: Location`, `to: Location`. |
-| **7** | `PlayerInteractEvent` | **Yes** | Player click: `player: Player`, `clicked_block: Option<Block>`, `action: String`. |
-| **8** | `PlayerTeleportEvent` | **Yes** | Teleportation: `player: Player`, `from: Location`, `to: Location`. |
-| **9** | `PlayerToggleFlightEvent` | **Yes** | Flight state toggled: `player: Player`, `is_flying: bool`. |
-| **10** | `PlayerToggleSneakEvent` | **Yes** | Sneak state toggled: `player: Player`, `is_sneaking: bool`. |
-| **11** | `PlayerToggleSprintEvent` | **Yes** | Sprint state toggled: `player: Player`, `is_sprinting: bool`. |
-| **12** | `PlayerRespawnEvent` | No | Player clicked respawn: `player: Player`, `respawn_location: Location`. |
-| **13** | `BlockBreakEvent` | **Yes** | Block broken: `player: Option<Player>`, `block: Block`. |
-| **14** | `BlockPlaceEvent` | **Yes** | Block placed: `player: Player`, `block: Block`, `placed_against: Option<Block>`. |
-| **15** | `EntityDamageEvent` | **Yes** | Entity damaged: `entity: Entity`, `damage: f32`, `cause: String`. |
-| **16** | `EntityDeathEvent` | No | Entity killed: `entity: Entity`, `dropped_items: Vec<ItemStack>`. |
-| **17** | `EntitySpawnEvent` | **Yes** | Entity spawning: `entity: Entity`, `location: Location`. |
-| **18** | `ItemDropEvent` | **Yes** | Item dropped by player: `player: Player`, `item: ItemStack`. |
-| **19** | `ItemPickupEvent` | **Yes** | Item collected: `player: Player`, `item: ItemStack`. |
-| **20** | `InventoryOpenEvent` | **Yes** | Player opened inventory: `player: Player`, `title: String`. |
-| **21** | `InventoryCloseEvent` | No | Player closed inventory: `player: Player`. |
-| **22** | `InventoryClickEvent` | **Yes** | Player clicked slot: `player: Player`, `slot: usize`, `click_type: String`. |
-| **23** | `ChunkLoadEvent` | No | Chunk loaded into memory: `x: i32`, `z: i32`, `world: String`. |
-| **24** | `ChunkUnloadEvent` | **Yes** | Chunk unloading: `x: i32`, `z: i32`, `world: String`. |
-| **25** | `WorldSaveEvent` | No | World chunk data flushed to disk: `world: String`. |
-| **26** | `ServerTickEvent` | No | Main server tick cycle (every 50ms): `tick_number: u64`. |
+| ID | Event Struct | Cancellable | Key Fields & Methods | Description |
+|:---:|---|:---:|---|---|
+| **1** | `PlayerJoinEvent` | **Yes** | `player`, `join_message` | Player connected and spawned into world. |
+| **2** | `PlayerQuitEvent` | No | `player`, `quit_message` | Player disconnected from server. |
+| **3** | `PlayerMoveEvent` | **Yes** | `player`, `from`, `to` | Player moved or rotated in the world. |
+| **4** | `PlayerInteractEvent` | **Yes** | `player`, `action`, `clicked_block`, `block_pos` | Player right/left clicked block or air. |
+| **5** | `BlockBreakEvent` | **Yes** | `player`, `block`, `location`, `drop_items()`, `set_drop_items(bool)` | Block broken by player. Supports suppressing vanilla loot drops. |
+| **6** | `BlockPlaceEvent` | **Yes** | `player`, `block`, `location` | Block placed by player. |
+| **7** | `EntitySpawnEvent` | **Yes** | `entity`, `location` | Entity spawning in world. |
+| **8** | `EntityDeathEvent` | No | `entity`, `killer`, `death_message`, `dropped_exp` | Living entity killed. |
+| **9** | `EntityDamageEvent` / `DamageEvent` | **Yes** | `entity`, `damager`, `damage` | Entity damaged by attack or environment. |
+| **10** | `PlayerChatEvent` | **Yes** | `player`, `message` | Player dispatched public chat message. |
+| **11** | `PlayerCommandPreprocessEvent` | **Yes** | `player`, `command` | Player issued command prior to execution. |
+| **12** | `PlayerDropItemEvent` | **Yes** | `player`, `item` | Player dropped item from inventory (`Q` key). |
+| **13** | `PlayerItemConsumeEvent` | **Yes** | `player`, `item` | Player consumed food or potion. |
+| **14** | `PlayerRespawnEvent` | No | `player`, `respawn_location`, `is_bed_spawn` | Player clicked respawn screen. |
+| **15** | `PlayerTeleportEvent` | **Yes** | `player`, `from`, `to` | Player teleported across locations or worlds. |
+| **16** | `PlayerGameModeChangeEvent` | **Yes** | `player`, `new_gamemode` | Player gamemode changed (Survival, Creative, etc.). |
+| **17** | `PlayerToggleSneakEvent` | **Yes** | `player`, `is_sneaking` | Sneak/crouch state changed. |
+| **18** | `PlayerToggleSprintEvent` | **Yes** | `player`, `is_sprinting` | Sprint state changed. |
+| **19** | `PlayerToggleFlightEvent` | **Yes** | `player`, `is_flying` | Flight state toggled on or off. |
+| **20** | `PlayerItemHeldEvent` | **Yes** | `player`, `previous_slot`, `new_slot` | Selected hotbar slot changed. |
+| **21** | `InventoryClickEvent` | **Yes** | `player`, `slot`, `click_type`, `clicked_item`, `cursor_item` | Clicked a slot in any container or custom GUI. |
+| **22** | `ServerListPingEvent` | No | `motd`, `online_players`, `max_players` | Client queried multiplayer server status list. |
+| **23** | `InventoryOpenEvent` | **Yes** | `player`, `title` | Container screen opened for player. |
+| **24** | `InventoryCloseEvent` | No | `player`, `title` | Container screen closed by player. |
+| **25** | `ServerTickStartEvent` | No | `tick_number` | Initiating server tick cycle (50ms tick). |
+| **26** | `ServerTickEndEvent` | No | `tick_number`, `duration_millis` | Completed server tick cycle with profiling duration. |
+| **27** | `PlayerPickupItemEvent` | **Yes** | `player`, `item` | Ground item picked up into inventory. |

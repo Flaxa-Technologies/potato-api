@@ -139,7 +139,18 @@ pub struct BlockBreakEvent {
     pub player: Option<Player>,
     pub block: Block,
     pub location: Location,
+    pub drop_items: bool,
     pub cancelled: bool,
+}
+
+impl BlockBreakEvent {
+    pub fn drop_items(&self) -> bool {
+        self.drop_items
+    }
+
+    pub fn set_drop_items(&mut self, drop_items: bool) {
+        self.drop_items = drop_items;
+    }
 }
 
 impl Event for BlockBreakEvent {
@@ -495,8 +506,10 @@ impl Cancellable for PlayerItemHeldEvent {
 #[derive(Clone, Debug)]
 pub struct InventoryClickEvent {
     pub player: Player,
-    pub slot: usize,
-    pub item: Option<ItemStack>,
+    pub slot: i32,
+    pub click_type: u8,
+    pub clicked_item: Option<ItemStack>,
+    pub cursor_item: Option<ItemStack>,
     pub cancelled: bool,
 }
 
@@ -587,3 +600,27 @@ pub struct ServerTickEndEvent {
 impl Event for ServerTickEndEvent {
     const EVENT_ID: u32 = 26;
 }
+
+// ==========================================
+// 27. PlayerPickupItemEvent (EVENT_ID = 27)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerPickupItemEvent {
+    pub player: Player,
+    pub item: ItemStack,
+    pub cancelled: bool,
+}
+
+impl Event for PlayerPickupItemEvent {
+    const EVENT_ID: u32 = 27;
+}
+
+impl Cancellable for PlayerPickupItemEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+

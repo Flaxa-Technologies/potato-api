@@ -2,7 +2,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::host::HostPlayer;
-use crate::types::{GameMode, Inventory, Location};
+use crate::types::{GameMode, Inventory, ItemStack, Location, PotionEffect};
 
 /// Safe, high-level abstraction representing an online player on the PotatoMC server.
 #[derive(Clone)]
@@ -200,6 +200,66 @@ impl Player {
             stay_ticks,
             fade_out_ticks,
         );
+    }
+
+    /// Drops an item stack into the world at the player's position.
+    pub fn drop_item(&self, item: &ItemStack) {
+        self.handle.drop_item(item);
+    }
+
+    /// Deposits an item into the player's inventory, syncing with the client.
+    /// Returns true if successfully inserted, false if the inventory is completely full.
+    pub fn give_item(&self, item: &ItemStack) -> bool {
+        self.handle.give_item(item)
+    }
+
+    /// Opens a custom virtual GUI container screen for the player.
+    /// Returns the opened screen synchronization ID.
+    pub fn open_gui(&self, gui: &crate::gui::Gui) -> u8 {
+        let items: Vec<(usize, ItemStack)> = gui
+            .items
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, opt)| opt.as_ref().map(|it| (idx, it.clone())))
+            .collect();
+        self.handle.open_gui(&gui.title, gui.size, &items, gui.allow_grab_items, gui.allow_put_items)
+    }
+
+    /// Closes any currently open container GUI screen for the player.
+    pub fn close_inventory(&self) {
+        self.handle.close_inventory();
+    }
+
+    /// Applies an active potion effect to the player.
+    pub fn add_potion_effect(&self, effect: &PotionEffect) {
+        self.handle.add_potion_effect(effect);
+    }
+
+    /// Removes a specific potion effect by name or namespaced identifier.
+    pub fn remove_potion_effect(&self, effect_type: &str) {
+        self.handle.remove_potion_effect(effect_type);
+    }
+
+    /// Removes all active potion effects from the player.
+    pub fn clear_potion_effects(&self) {
+        self.handle.clear_potion_effects();
+    }
+
+    /// Checks if the player currently has the specified potion effect.
+    pub fn has_potion_effect(&self, effect_type: &str) -> bool {
+        self.handle.has_potion_effect(effect_type)
+    }
+
+    /// Spawns particle effects visible to this player.
+    pub fn spawn_particle(
+        &self,
+        particle: &str,
+        location: &Location,
+        count: u32,
+        offset: (f64, f64, f64),
+        speed: f32,
+    ) {
+        self.handle.spawn_particle(particle, location, count, offset.0, offset.1, offset.2, speed);
     }
 }
 

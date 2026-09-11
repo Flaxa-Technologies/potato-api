@@ -192,8 +192,11 @@ Every template and scaffolded plugin automatically comes bundled with **`AGENT.m
 Explore the complete API reference in the [`docs/`](docs/) directory:
 
 - 🏗️ **[Plugin Lifecycle & Architecture](docs/LIFECYCLE.md)**
-- ⚡ **[Event System & 27-Event Catalog](docs/EVENTS.md)** (with Block Break loot suppression)
+- ⚡ **[Event System & 44-Event Catalog](docs/EVENTS.md)** (with Block Break loot suppression, Dialog & Form events)
 - 🪟 **[Virtual GUI & Inventory API](docs/GUI_AND_INVENTORY.md)** (Chest GUIs, slot control, inventory manipulation)
+- 💬 **[Dialog Box, Forms & Virtual Book API](docs/DIALOGS_AND_FORMS.md)** (Java 1.21.4+ Dialogs, Bedrock Forms, Books, Signs)
+- 📊 **[Scoreboards & Teams API](docs/SCOREBOARDS_AND_TEAMS.md)** (Fast sidebar scoreboards, custom objectives, teams)
+- 🔊 **[Sounds & Environmental World API](docs/SOUNDS_AND_ENVIRONMENT.md)** (Sound effects, lightning strikes, weather control)
 - 🧪 **[Potions & Particle Effects](docs/POTIONS_AND_PARTICLES.md)** (Status effects builder and particle broadcasts)
 - 🌲 **[Brigadier Command Tree API](docs/COMMANDS.md)**
 - 🎨 **[Adventure Text & MiniMessage](docs/TEXT_AND_MINIMESSAGE.md)**

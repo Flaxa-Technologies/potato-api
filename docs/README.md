@@ -29,7 +29,7 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
 
 2. **[Event System & Cancellable](EVENTS.md)**
    - Publisher / Observer pattern
-   - Complete 27-event catalog (IDs 1–27)
+   - Complete 44-event catalog (IDs 1–44)
    - Block break loot suppression via `set_drop_items(false)`
    - `Cancellable` trait & stopping vanilla actions
    - `EventPriority` ordering (`Lowest` to `Monitor`)
@@ -41,46 +41,65 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
    - Event handling with `InventoryClickEvent`
    - Giving and dropping items (`player.give_item`, `player.drop_item`, `world.drop_item`)
 
-4. **[Potions & Particle Effects](POTIONS_AND_PARTICLES.md)**
+4. **[Dialog Box, Forms & Virtual Book API](DIALOGS_AND_FORMS.md)**
+   - Java 1.21.4+ native Dialog Box builder (`Dialog`)
+   - Bedrock crossplay form dialogs (`SimpleForm`, `ModalForm`, `CustomForm`)
+   - Virtual Book GUI (`Book`) without item in hand
+   - Interactive Sign editor dialog
+   - Dialog click and response events (`DialogClickActionEvent`, `PlayerFormResponseEvent`)
+
+5. **[Scoreboards & Teams API](SCOREBOARDS_AND_TEAMS.md)**
+   - Fast sidebar scoreboards (`set_sidebar_lines`)
+   - Scoreboard builder (`Scoreboard::sidebar`, `set_line`)
+   - DisplaySlots (`Sidebar`, `BelowName`, `List`)
+   - Team prefix, suffix, color, and friendly fire (`Team`)
+
+6. **[Sounds & Environmental World API](SOUNDS_AND_ENVIRONMENT.md)**
+   - Sound effect playback with `SoundCategory`
+   - Sound stopping (`stop_sound`)
+   - Real and cosmetic lightning strikes (`strike_lightning`, `strike_lightning_effect`)
+   - World weather, thunder, and highest block queries
+
+7. **[Potions & Particle Effects](POTIONS_AND_PARTICLES.md)**
    - Fluent `PotionEffect` builder
    - Managing player status effects (`add_potion_effect`, `has_potion_effect`, `clear_potion_effects`)
    - Particle effect broadcasts (`world.spawn_particle`, `player.spawn_particle`)
 
-5. **[Brigadier Command API](COMMANDS.md)**
+8. **[Brigadier Command API](COMMANDS.md)**
    - Tree-based fluent command builders (`Command::tree`)
    - Subcommands and argument parsing (`word`, `string`, `int`, `float`, `bool`, `player`)
    - `CommandSender` (Player vs Console handling)
    - Dynamic tab suggestions
 
-6. **[Adventure Text & MiniMessage](TEXT_AND_MINIMESSAGE.md)**
+9. **[Adventure Text & MiniMessage](TEXT_AND_MINIMESSAGE.md)**
    - Adventure `Component` architecture
    - MiniMessage tag syntax (`<gradient>`, `<bold>`, hex colors)
    - Action bars & animated titles
    - Custom Tab List Header & Footer (`Player#set_player_list_header_footer`)
 
-7. **[Persistent Data Container (PDC) & Items](PDC_AND_ITEMS.md)**
-   - Attaching arbitrary typed metadata to items (`strings`, `ints`, `longs`, `bytes`)
-   - `ItemStack` builder, lore, and custom names
-   - Custom enchantments (`add_enchantment`, `get_enchantment_level`)
+10. **[Persistent Data Container (PDC) & Items](PDC_AND_ITEMS.md)**
+    - Attaching arbitrary typed metadata to items (`strings`, `ints`, `longs`, `bytes`)
+    - `ItemStack` builder, lore, and custom names
+    - Custom enchantments (`add_enchantment`, `get_enchantment_level`)
 
-8. **[Scheduler & Concurrency](SCHEDULER.md)**
-   - Main-thread tick synchronization
-   - Delayed tasks (`run_task_later`)
-   - Repeating interval tasks (`run_task_repeating`)
-   - Asynchronous off-thread background worker threads
+11. **[Scheduler & Concurrency](SCHEDULER.md)**
+    - Main-thread tick synchronization
+    - Delayed tasks (`run_task_later`)
+    - Repeating interval tasks (`run_task_repeating`)
+    - Asynchronous off-thread background worker threads
 
-9. **[Configuration API](CONFIGURATION.md)**
-   - YAML configuration file loader (`config.yml`)
-   - Dot-notation queries (`server.motd`, `features.pvp`)
-   - Type-safe getters with fallbacks (`get_string_or`, `get_int_or`, `get_bool_or`)
-   - Bundling default configuration files
+12. **[Configuration API](CONFIGURATION.md)**
+    - YAML configuration file loader (`config.yml`)
+    - Dot-notation queries (`server.motd`, `features.pvp`)
+    - Type-safe getters with fallbacks (`get_string_or`, `get_int_or`, `get_bool_or`)
+    - Bundling default configuration files
 
-10. **[BossBar API](BOSSBAR.md)**
+13. **[BossBar API](BOSSBAR.md)**
     - Creating Adventure-compatible BossBars
     - Colors and division overlay styles
     - Real-time progress updates
 
-11. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
+14. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
     - Side-by-side Java vs. Rust code translations
     - Differences in threading and memory models
 

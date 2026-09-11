@@ -56,6 +56,41 @@ pub trait HostPlayer: Send + Sync {
     fn clear_potion_effects(&self) {}
     fn has_potion_effect(&self, _effect_type: &str) -> bool { false }
     fn spawn_particle(&self, _particle: &str, _location: &Location, _count: u32, _offset_x: f64, _offset_y: f64, _offset_z: f64, _speed: f32) {}
+
+    // Paper / Bukkit / Dialog expansions
+    fn saturation(&self) -> f32 { 5.0 }
+    fn set_saturation(&self, _saturation: f32) {}
+    fn exhaustion(&self) -> f32 { 0.0 }
+    fn set_exhaustion(&self, _exhaustion: f32) {}
+    fn exp_progress(&self) -> f32 { 0.0 }
+    fn set_exp_progress(&self, _progress: f32) {}
+    fn is_op(&self) -> bool { false }
+    fn set_op(&self, _op: bool) {}
+    fn locale(&self) -> String { "en_us".to_string() }
+    fn client_brand(&self) -> String { "vanilla".to_string() }
+    fn walk_speed(&self) -> f32 { 0.2 }
+    fn set_walk_speed(&self, _speed: f32) {}
+    fn fly_speed(&self) -> f32 { 0.1 }
+    fn set_fly_speed(&self, _speed: f32) {}
+    fn clear_title(&self) {}
+    fn reset_title(&self) {}
+    fn play_sound_category(&self, sound: &str, _category: u8, volume: f32, pitch: f32) {
+        self.play_sound(sound, volume, pitch);
+    }
+    fn stop_sound(&self, _sound: Option<&str>) {}
+    fn open_book(&self, _title: &str, _author: &str, _pages: &[String]) {}
+    fn open_sign_editor(&self, _location: &Location) {}
+    fn show_dialog_raw(&self, _dialog_json: &str) {}
+    fn clear_dialog(&self) {}
+    fn send_form_raw(&self, _form_id: u32, _form_json: &str) {}
+    fn send_resource_pack(&self, _url: &str, _hash: &str, _required: bool, _prompt: Option<&str>) {}
+    fn hide_player(&self, _target: &Uuid) {}
+    fn show_player(&self, _target: &Uuid) {}
+    fn can_see(&self, _target: &Uuid) -> bool { true }
+    fn respawn(&self) {}
+    fn set_scoreboard_lines(&self, _title: &str, _lines: &[(usize, String)]) {}
+    fn clear_scoreboard(&self) {}
+    fn send_plugin_message(&self, _channel: &str, _data: &[u8]) {}
 }
 
 pub trait HostWorld: Send + Sync {
@@ -84,6 +119,14 @@ pub trait HostWorld: Send + Sync {
         self.set_block(x, y, z, &Block::new("minecraft:air", 0))
     }
     fn spawn_particle(&self, _particle: &str, _location: &Location, _count: u32, _offset_x: f64, _offset_y: f64, _offset_z: f64, _speed: f32) {}
+    fn strike_lightning(&self, _location: &Location) {}
+    fn strike_lightning_effect(&self, _location: &Location) {}
+    fn get_highest_block_y(&self, _x: i32, _z: i32) -> i32 { 64 }
+    fn is_thundering(&self) -> bool { false }
+    fn set_thundering(&self, _thundering: bool) {}
+    fn play_sound_category(&self, location: &Location, sound: &str, _category: u8, volume: f32, pitch: f32) {
+        self.play_sound(location, sound, volume, pitch);
+    }
 }
 
 pub trait HostEntity: Send + Sync {
@@ -144,4 +187,9 @@ pub trait HostContext: Send + Sync {
     fn get_tps(&self) -> f64 { 20.0 }
     fn max_players(&self) -> u32 { 100 }
     fn dispatch_command(&self, _command: &str) -> bool { false }
+    fn server_motd(&self) -> String { "A PotatoMC Server".to_string() }
+    fn set_server_motd(&self, _motd: &str) {}
+    fn shutdown(&self) {}
+    fn reload(&self) {}
+    fn send_plugin_message(&self, _player: &Uuid, _channel: &str, _data: &[u8]) {}
 }

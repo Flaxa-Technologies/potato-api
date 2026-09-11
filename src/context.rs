@@ -212,6 +212,31 @@ impl Server {
     pub fn version(&self) -> &str {
         self.host.server_version()
     }
+
+    /// Returns the server Message of the Day (MOTD).
+    pub fn motd(&self) -> String {
+        self.host.server_motd()
+    }
+
+    /// Updates the server Message of the Day (MOTD).
+    pub fn set_motd(&self, motd: &str) {
+        self.host.set_server_motd(motd);
+    }
+
+    /// Initiates graceful server shutdown.
+    pub fn shutdown(&self) {
+        self.host.shutdown();
+    }
+
+    /// Reloads server configurations and reloadable subsystems.
+    pub fn reload(&self) {
+        self.host.reload();
+    }
+
+    /// Sends a plugin messaging packet to the given player.
+    pub fn send_plugin_message(&self, player: &Player, channel: &str, data: &[u8]) {
+        self.host.send_plugin_message(&player.uuid(), channel, data);
+    }
 }
 
 struct EventAdapter<E: Event, H: EventHandler<E>> {

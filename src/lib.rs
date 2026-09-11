@@ -2,6 +2,7 @@ pub mod bossbar;
 pub mod command;
 pub mod config;
 pub mod context;
+pub mod dialog;
 pub mod entity;
 pub mod event;
 pub mod gui;
@@ -9,6 +10,8 @@ pub mod host;
 pub mod player;
 pub mod plugin;
 pub mod scheduler;
+pub mod scoreboard;
+pub mod sound;
 pub mod text;
 pub mod types;
 pub mod world;
@@ -20,12 +23,18 @@ pub use command::{
 };
 pub use config::Config;
 pub use context::{Logger, PluginContext, Server};
+pub use dialog::{
+    Book, CustomForm, CustomFormElement, Dialog, DialogAction, DialogBody, DialogButton,
+    DialogInput, FormImage, ModalForm, SimpleForm, SimpleFormButton,
+};
 pub use entity::{Entity, LivingEntity};
 pub use event::*;
 pub use gui::Gui;
 pub use player::Player;
 pub use plugin::{Plugin, PluginMetadata};
 pub use scheduler::{Scheduler, TaskHandle};
+pub use scoreboard::{DisplaySlot, ObjectiveCriteria, Scoreboard, Team};
+pub use sound::{Sound, SoundCategory};
 pub use text::{Component, NamedTextColor, TextDecoration};
 pub use types::{
     Block, Difficulty, EquipmentSlot, GameMode, HostInventory, Inventory, ItemStack, Location,
@@ -393,6 +402,85 @@ tags:
         assert_eq!(effect.amplifier, 1);
         assert!(effect.ambient);
         assert!(!effect.particles);
+    }
+
+    #[test]
+    fn test_dialog_and_forms() {
+        let dialog = Dialog::new("quest_dialog")
+            .title("Quest Offer")
+            .body_text("Will you slay the Ender Dragon?")
+            .add_action_button("Accept", "quest_accept")
+            .add_url_button("Discord", "https://discord.gg/UUaNzfZyc6");
+        assert_eq!(dialog.id, "quest_dialog");
+        assert_eq!(dialog.buttons.len(), 2);
+
+        let modal = ModalForm::new("Confirmation", "Are you sure?", "Yes", "No");
+        let json = modal.to_json().unwrap();
+        assert!(json.contains("Confirmation"));
+        assert!(json.contains("modal"));
+
+        let simple = SimpleForm::new("Lobby Menu")
+            .content("Select a server:")
+            .button("Survival")
+            .button("Creative");
+        let s_json = simple.to_json().unwrap();
+        assert!(s_json.contains("Survival"));
+        assert!(s_json.contains("Creative"));
+
+        let book = Book::new("Rules", "Admin")
+            .add_page("Page 1: Be polite.")
+            .add_page("Page 2: Have fun!");
+        assert_eq!(book.pages.len(), 2);
+    }
+
+    #[test]
+    fn test_scoreboard_and_teams() {
+        let mut sb = Scoreboard::sidebar("§6§lPotatoMC");
+        sb.set_lines(&["§7Online: §a10", "§7Rank: §eMVP"]);
+        assert_eq!(sb.lines().len(), 2);
+        assert_eq!(sb.get_line(2), Some("§7Online: §a10"));
+        assert_eq!(sb.get_line(1), Some("§7Rank: §eMVP"));
+
+        sb.set_line(15, "§cHigh Score");
+        assert_eq!(sb.get_line(15), Some("§cHigh Score"));
+        sb.remove_line(15);
+        assert_eq!(sb.get_line(15), None);
+
+        let team = Team::new("red")
+            .prefix("§c[RED] ")
+            .color("red")
+            .friendly_fire(false);
+        assert_eq!(team.name, "red");
+        assert_eq!(team.prefix, Some("§c[RED] ".to_string()));
+    }
+
+    #[test]
+    fn test_sound_constants() {
+        assert_eq!(SoundCategory::Master.as_str(), "master");
+        assert_eq!(SoundCategory::Voice.as_str(), "voice");
+        assert_eq!(Sound::ENTITY_PLAYER_LEVELUP, "minecraft:entity.player.levelup");
+        assert_eq!(Sound::BLOCK_NOTE_BLOCK_PLING, "minecraft:block.note_block.pling");
+    }
+
+    #[test]
+    fn test_expanded_events() {
+        assert_eq!(PlayerDeathEvent::EVENT_ID, 28);
+        assert_eq!(PlayerLevelChangeEvent::EVENT_ID, 29);
+        assert_eq!(PlayerExpChangeEvent::EVENT_ID, 30);
+        assert_eq!(PlayerBedEnterEvent::EVENT_ID, 31);
+        assert_eq!(PlayerBedLeaveEvent::EVENT_ID, 32);
+        assert_eq!(SignChangeEvent::EVENT_ID, 33);
+        assert_eq!(ServerCommandEvent::EVENT_ID, 34);
+        assert_eq!(WeatherChangeEvent::EVENT_ID, 35);
+        assert_eq!(ThunderChangeEvent::EVENT_ID, 36);
+        assert_eq!(ExplosionEvent::EVENT_ID, 37);
+        assert_eq!(ProjectileLaunchEvent::EVENT_ID, 38);
+        assert_eq!(ProjectileHitEvent::EVENT_ID, 39);
+        assert_eq!(EntityTargetEvent::EVENT_ID, 40);
+        assert_eq!(DialogShowEvent::EVENT_ID, 41);
+        assert_eq!(DialogClickActionEvent::EVENT_ID, 42);
+        assert_eq!(DialogClearEvent::EVENT_ID, 43);
+        assert_eq!(PlayerFormResponseEvent::EVENT_ID, 44);
     }
 }
 

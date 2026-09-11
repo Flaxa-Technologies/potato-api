@@ -261,6 +261,197 @@ impl Player {
     ) {
         self.handle.spawn_particle(particle, location, count, offset.0, offset.1, offset.2, speed);
     }
+
+    /// Returns the player's current saturation level.
+    pub fn saturation(&self) -> f32 {
+        self.handle.saturation()
+    }
+
+    /// Sets the player's current saturation level.
+    pub fn set_saturation(&self, saturation: f32) {
+        self.handle.set_saturation(saturation);
+    }
+
+    /// Returns the player's exhaustion level.
+    pub fn exhaustion(&self) -> f32 {
+        self.handle.exhaustion()
+    }
+
+    /// Sets the player's exhaustion level.
+    pub fn set_exhaustion(&self, exhaustion: f32) {
+        self.handle.set_exhaustion(exhaustion);
+    }
+
+    /// Returns the player's experience progress toward next level (0.0 - 1.0).
+    pub fn exp_progress(&self) -> f32 {
+        self.handle.exp_progress()
+    }
+
+    /// Sets the player's experience progress toward next level (0.0 - 1.0).
+    pub fn set_exp_progress(&self, progress: f32) {
+        self.handle.set_exp_progress(progress);
+    }
+
+    /// Checks whether the player is a server operator.
+    pub fn is_op(&self) -> bool {
+        self.handle.is_op()
+    }
+
+    /// Sets whether the player is an operator.
+    pub fn set_op(&self, op: bool) {
+        self.handle.set_op(op);
+    }
+
+    /// Returns the client's locale (e.g. "en_us").
+    pub fn locale(&self) -> String {
+        self.handle.locale()
+    }
+
+    /// Returns the client brand name reported upon handshake (e.g. "vanilla", "fabric").
+    pub fn client_brand(&self) -> String {
+        self.handle.client_brand()
+    }
+
+    /// Returns the player's current walking speed.
+    pub fn walk_speed(&self) -> f32 {
+        self.handle.walk_speed()
+    }
+
+    /// Sets the player's walking speed (default ~0.2).
+    pub fn set_walk_speed(&self, speed: f32) {
+        self.handle.set_walk_speed(speed);
+    }
+
+    /// Returns the player's flying speed.
+    pub fn fly_speed(&self) -> f32 {
+        self.handle.fly_speed()
+    }
+
+    /// Sets the player's flying speed (default ~0.1).
+    pub fn set_fly_speed(&self, speed: f32) {
+        self.handle.set_fly_speed(speed);
+    }
+
+    /// Clears any currently active title display from the player's screen.
+    pub fn clear_title(&self) {
+        self.handle.clear_title();
+    }
+
+    /// Resets the title timings back to vanilla defaults.
+    pub fn reset_title(&self) {
+        self.handle.reset_title();
+    }
+
+    /// Plays a sound to the player using a specific sound category.
+    pub fn play_sound_category(
+        &self,
+        sound: &str,
+        category: crate::sound::SoundCategory,
+        volume: f32,
+        pitch: f32,
+    ) {
+        self.handle.play_sound_category(sound, category as u8, volume, pitch);
+    }
+
+    /// Stops playing a specific sound (or all sounds if None).
+    pub fn stop_sound(&self, sound: Option<&str>) {
+        self.handle.stop_sound(sound);
+    }
+
+    /// Opens a written book interface for the player without requiring an item in hand.
+    pub fn open_book(&self, book: &crate::dialog::Book) {
+        self.handle.open_book(&book.title, &book.author, &book.pages);
+    }
+
+    /// Opens the sign editor dialog UI for a placed sign at the given location.
+    pub fn open_sign_editor(&self, location: &Location) {
+        self.handle.open_sign_editor(location);
+    }
+
+    /// Shows a native Minecraft 1.21.4+ Dialog Box to the player.
+    pub fn show_dialog(&self, dialog: &crate::dialog::Dialog) {
+        if let Ok(json) = serde_json::to_string(dialog) {
+            self.handle.show_dialog_raw(&json);
+        }
+    }
+
+    /// Clears any active dialog box currently displayed on the player's screen.
+    pub fn clear_dialog(&self) {
+        self.handle.clear_dialog();
+    }
+
+    /// Sends a Bedrock / Crossplay Form dialog directly to the player.
+    pub fn send_form(&self, form_id: u32, form_json: &str) {
+        self.handle.send_form_raw(form_id, form_json);
+    }
+
+    /// Convenience method to send a Bedrock SimpleForm dialog.
+    pub fn send_simple_form(&self, form_id: u32, form: &crate::dialog::SimpleForm) {
+        if let Ok(json) = form.to_json() {
+            self.send_form(form_id, &json);
+        }
+    }
+
+    /// Convenience method to send a Bedrock ModalForm dialog.
+    pub fn send_modal_form(&self, form_id: u32, form: &crate::dialog::ModalForm) {
+        if let Ok(json) = form.to_json() {
+            self.send_form(form_id, &json);
+        }
+    }
+
+    /// Convenience method to send a Bedrock CustomForm dialog.
+    pub fn send_custom_form(&self, form_id: u32, form: &crate::dialog::CustomForm) {
+        if let Ok(json) = form.to_json() {
+            self.send_form(form_id, &json);
+        }
+    }
+
+    /// Prompts the player to download and apply a server resource pack.
+    pub fn send_resource_pack(&self, url: &str, hash: &str, required: bool, prompt: Option<&str>) {
+        self.handle.send_resource_pack(url, hash, required, prompt);
+    }
+
+    /// Hides another player from this player's client (Paper Vanish API).
+    pub fn hide_player(&self, other: &Player) {
+        self.handle.hide_player(&other.uuid());
+    }
+
+    /// Restores visibility of a hidden player for this player's client.
+    pub fn show_player(&self, other: &Player) {
+        self.handle.show_player(&other.uuid());
+    }
+
+    /// Checks if this player can currently see the specified other player.
+    pub fn can_see(&self, other: &Player) -> bool {
+        self.handle.can_see(&other.uuid())
+    }
+
+    /// Forces a player respawn.
+    pub fn respawn(&self) {
+        self.handle.respawn();
+    }
+
+    /// Displays a custom Scoreboard to the player.
+    pub fn set_scoreboard(&self, scoreboard: &crate::scoreboard::Scoreboard) {
+        self.handle.set_scoreboard_lines(&scoreboard.title, &scoreboard.lines);
+    }
+
+    /// Clears the scoreboard / sidebar for this player.
+    pub fn clear_scoreboard(&self) {
+        self.handle.clear_scoreboard();
+    }
+
+    /// Fast helper to render a sidebar scoreboard with given title and lines.
+    pub fn set_sidebar_lines(&self, title: &str, lines: &[impl AsRef<str>]) {
+        let mut sb = crate::scoreboard::Scoreboard::sidebar(title);
+        sb.set_lines(lines);
+        self.set_scoreboard(&sb);
+    }
+
+    /// Sends a plugin messaging packet (BungeeCord / Velocity / custom channel).
+    pub fn send_plugin_message(&self, channel: &str, data: &[u8]) {
+        self.handle.send_plugin_message(channel, data);
+    }
 }
 
 impl std::fmt::Debug for Player {

@@ -89,7 +89,7 @@ Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying a
 
 ---
 
-## 5. Complete 27-Event Catalog
+## 5. Complete 44-Event Catalog
 
 | ID | Event Struct | Cancellable | Key Fields & Methods | Description |
 |:---:|---|:---:|---|---|
@@ -120,3 +120,20 @@ Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying a
 | **25** | `ServerTickStartEvent` | No | `tick_number` | Initiating server tick cycle (50ms tick). |
 | **26** | `ServerTickEndEvent` | No | `tick_number`, `duration_millis` | Completed server tick cycle with profiling duration. |
 | **27** | `PlayerPickupItemEvent` | **Yes** | `player`, `item` | Ground item picked up into inventory. |
+| **28** | `PlayerDeathEvent` | No | `player`, `drops`, `dropped_exp`, `death_message`, `keep_inventory`, `keep_level` | Player died. Supports modifying drops, exp, and keep inventory flags. |
+| **29** | `PlayerLevelChangeEvent` | No | `player`, `old_level`, `new_level` | Player experience level changed. |
+| **30** | `PlayerExpChangeEvent` | No | `player`, `amount` | Player experience points gained or spent. |
+| **31** | `PlayerBedEnterEvent` | **Yes** | `player`, `bed_location` | Player attempted to sleep in a bed. |
+| **32** | `PlayerBedLeaveEvent` | No | `player`, `bed_location` | Player left a bed. |
+| **33** | `SignChangeEvent` | **Yes** | `player`, `location`, `lines: [String; 4]` | Player finished editing text on a sign. |
+| **34** | `ServerCommandEvent` | **Yes** | `sender`, `command` | Console or remote sender executed a command. |
+| **35** | `WeatherChangeEvent` | **Yes** | `world`, `to_weather_state` | World rain/storm state changing. |
+| **36** | `ThunderChangeEvent` | **Yes** | `world`, `to_thunder_state` | World thunder state changing. |
+| **37** | `ExplosionEvent` | **Yes** | `location`, `yield_rate` | Explosion occurred in the world. |
+| **38** | `ProjectileLaunchEvent` | **Yes** | `entity`, `shooter` | Arrow, snowball, or projectile launched. |
+| **39** | `ProjectileHitEvent` | **Yes** | `entity`, `hit_entity`, `hit_block` | Projectile impacted an entity or block. |
+| **40** | `EntityTargetEvent` | **Yes** | `entity`, `target` | Mob or entity selected a new target. |
+| **41** | `DialogShowEvent` | **Yes** | `player`, `dialog_id` | Native Dialog Box is about to display on player screen. |
+| **42** | `DialogClickActionEvent` | **Yes** | `player`, `action_id`, `payload` | Player clicked an action button inside a Dialog Box. |
+| **43** | `DialogClearEvent` | No | `player` | Player closed or dismissed a Dialog Box. |
+| **44** | `PlayerFormResponseEvent` | **Yes** | `player`, `form_id`, `response_json` | Player submitted response to a Bedrock / Crossplay Form dialog. |

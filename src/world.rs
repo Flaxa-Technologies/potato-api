@@ -127,6 +127,43 @@ impl World {
     ) {
         self.handle.spawn_particle(particle, location, count, offset.0, offset.1, offset.2, speed);
     }
+
+    /// Strikes a real lightning bolt at the given location (creates fire and damage).
+    pub fn strike_lightning(&self, location: &Location) {
+        self.handle.strike_lightning(location);
+    }
+
+    /// Strikes a visual / sound effect lightning bolt without causing fire or damage.
+    pub fn strike_lightning_effect(&self, location: &Location) {
+        self.handle.strike_lightning_effect(location);
+    }
+
+    /// Returns the highest non-air block Y coordinate at the given horizontal X/Z coordinate.
+    pub fn get_highest_block_y(&self, x: i32, z: i32) -> i32 {
+        self.handle.get_highest_block_y(x, z)
+    }
+
+    /// Checks whether it is currently thundering in this world.
+    pub fn is_thundering(&self) -> bool {
+        self.handle.is_thundering()
+    }
+
+    /// Sets whether it is thundering in this world.
+    pub fn set_thundering(&self, thundering: bool) {
+        self.handle.set_thundering(thundering);
+    }
+
+    /// Plays a sound effect at a specific world location with sound category.
+    pub fn play_sound_category(
+        &self,
+        location: &Location,
+        sound: &str,
+        category: crate::sound::SoundCategory,
+        volume: f32,
+        pitch: f32,
+    ) {
+        self.handle.play_sound_category(location, sound, category as u8, volume, pitch);
+    }
 }
 
 impl std::fmt::Debug for World {

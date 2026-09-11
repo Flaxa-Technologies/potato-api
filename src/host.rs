@@ -91,6 +91,16 @@ pub trait HostPlayer: Send + Sync {
     fn set_scoreboard_lines(&self, _title: &str, _lines: &[(usize, String)]) {}
     fn clear_scoreboard(&self) {}
     fn send_plugin_message(&self, _channel: &str, _data: &[u8]) {}
+
+    // Toast, Cooldown, Raytracing, Game Events
+    fn set_item_cooldown(&self, _item_id: &str, _ticks: u32) {}
+    fn get_item_cooldown(&self, _item_id: &str) -> u32 { 0 }
+    fn has_item_cooldown(&self, item_id: &str) -> bool { self.get_item_cooldown(item_id) > 0 }
+    fn send_toast(&self, _title: &str, _icon: &str, _frame: u8) {}
+    fn send_demo_screen(&self) {}
+    fn send_game_event(&self, _event_type: u8, _value: f32) {}
+    fn get_target_block(&self, _max_distance: f64) -> Option<Block> { None }
+    fn get_target_entity(&self, _max_distance: f64) -> Option<Arc<dyn HostEntity>> { None }
 }
 
 pub trait HostWorld: Send + Sync {
@@ -145,6 +155,18 @@ pub trait HostEntity: Send + Sync {
     fn fire_ticks(&self) -> i32;
     fn set_fire_ticks(&self, ticks: i32);
     fn damage(&self, amount: f32);
+
+    fn is_glowing(&self) -> bool { false }
+    fn set_glowing(&self, _glowing: bool) {}
+    fn is_invulnerable(&self) -> bool { false }
+    fn set_invulnerable(&self, _invulnerable: bool) {}
+    fn is_silent(&self) -> bool { false }
+    fn set_silent(&self, _silent: bool) {}
+    fn has_gravity(&self) -> bool { true }
+    fn set_gravity(&self, _gravity: bool) {}
+    fn scoreboard_tags(&self) -> Vec<String> { Vec::new() }
+    fn add_scoreboard_tag(&self, _tag: &str) -> bool { false }
+    fn remove_scoreboard_tag(&self, _tag: &str) -> bool { false }
 }
 
 pub trait HostLivingEntity: Send + Sync {
@@ -152,6 +174,8 @@ pub trait HostLivingEntity: Send + Sync {
     fn health(&self) -> f32;
     fn set_health(&self, health: f32);
     fn max_health(&self) -> f32;
+    fn eye_location(&self) -> Location { self.base_entity().location() }
+    fn eye_height(&self) -> f64 { 1.62 }
 }
 
 pub trait HostConsole: Send + Sync {

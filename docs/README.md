@@ -29,13 +29,14 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
 
 2. **[Event System & Cancellable](EVENTS.md)**
    - Publisher / Observer pattern
-   - Complete 44-event catalog (IDs 1–44)
+   - Complete 55-event catalog (IDs 1–55)
    - Block break loot suppression via `set_drop_items(false)`
    - `Cancellable` trait & stopping vanilla actions
    - `EventPriority` ordering (`Lowest` to `Monitor`)
 
 3. **[Virtual GUI & Inventory API](GUI_AND_INVENTORY.md)**
    - Fluent chest GUI builder (`Gui::chest(title, rows)`)
+   - Hopper (5 slots) and Dispenser/Dropper (9 slots) virtual layouts
    - Slot mapping, custom borders, and interaction flags (`allow_grab`, `allow_put`)
    - `player.open_gui(&gui)` and `player.close_inventory()`
    - Event handling with `InventoryClickEvent`
@@ -81,6 +82,7 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
     - Attaching arbitrary typed metadata to items (`strings`, `ints`, `longs`, `bytes`)
     - `ItemStack` builder, lore, and custom names
     - Custom enchantments (`add_enchantment`, `get_enchantment_level`)
+    - Item attack cooldown tracking (`set_item_cooldown`, `get_item_cooldown`)
 
 11. **[Scheduler & Concurrency](SCHEDULER.md)**
     - Main-thread tick synchronization
@@ -99,7 +101,23 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
     - Colors and division overlay styles
     - Real-time progress updates
 
-14. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
+14. **[Line-of-Sight Raytracing & Targeting API](RAYTRACING_AND_TARGETING.md)**
+    - Voxel fast-traversal raymarching (`player.get_target_block(max_distance)`)
+    - Axis-Aligned Bounding Box (AABB) intersection tests (`BoundingBox`)
+    - Entity crosshair targeting (`player.get_target_entity(max_distance)`)
+    - Vector math library (`Vector3` dot, cross, normalize, angles)
+
+15. **[Toasts, Game Events & Demo Screens](TOASTS_AND_GAME_EVENTS.md)**
+    - Advancements UI toast notifications (`player.send_toast(...)`, `ToastFrame`)
+    - Direct client Game Events (`send_game_event`, rain, elder guardian, credits)
+    - Interactive Demo reminder screen (`player.send_demo_screen()`)
+
+16. **[Advanced Entity Flags, Tags & Manipulation](ADVANCED_ENTITIES.md)**
+    - Entity metadata flags (`set_glowing`, `set_invulnerable`, `set_silent`, `set_gravity`)
+    - Scoreboard tags (`add_scoreboard_tag`, `remove_scoreboard_tag`, `scoreboard_tags`)
+    - Precise eye height and eye location calculation
+
+17. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
     - Side-by-side Java vs. Rust code translations
     - Differences in threading and memory models
 

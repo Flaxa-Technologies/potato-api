@@ -89,7 +89,7 @@ Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying a
 
 ---
 
-## 5. Complete 44-Event Catalog
+## 5. Complete 55-Event Catalog
 
 | ID | Event Struct | Cancellable | Key Fields & Methods | Description |
 |:---:|---|:---:|---|---|
@@ -137,3 +137,15 @@ Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying a
 | **42** | `DialogClickActionEvent` | **Yes** | `player`, `action_id`, `payload` | Player clicked an action button inside a Dialog Box. |
 | **43** | `DialogClearEvent` | No | `player` | Player closed or dismissed a Dialog Box. |
 | **44** | `PlayerFormResponseEvent` | **Yes** | `player`, `form_id`, `response_json` | Player submitted response to a Bedrock / Crossplay Form dialog. |
+| **45** | `PlayerPortalEvent` | **Yes** | `player`, `from`, `to` | Player entered nether/end portal with destination mapping. |
+| **46** | `PlayerItemBreakEvent` | No | `player`, `broken_item` | Tool, weapon, or armor durability depleted and broke. |
+| **47** | `PlayerBucketEmptyEvent` | **Yes** | `player`, `block_clicked`, `bucket_item` | Player emptied water, lava, or powder snow bucket. |
+| **48** | `PlayerBucketFillEvent` | **Yes** | `player`, `block_clicked`, `bucket_item` | Player collected liquid or mob with an empty bucket. |
+| **49** | `PlayerShearEntityEvent` | **Yes** | `player`, `entity`, `item` | Player sheared sheep, mooshroom, or snow golem. |
+| **50** | `EntityDamageByBlockEvent` | **Yes** | `entity`, `damager_block`, `damage` | Entity damaged by cactus, magma, campfire, or falling anvil. |
+| **51** | `EntityCombustEvent` | **Yes** | `entity`, `duration_secs` | Entity caught fire (sunlight, lava, fire aspect). |
+| **52** | `EntityCombustByEntityEvent` | **Yes** | `entity`, `combuster`, `duration_secs` | Entity set on fire directly by another entity or flaming arrow. |
+| **53** | `PlayerAdvancementDoneEvent` | No | `player`, `advancement_id` | Player achieved or completed an in-game advancement criteria. |
+| **54** | `InventoryMoveItemEvent` | **Yes** | `source_slot`, `destination_slot`, `item` | Hopper or automation moved an item between containers. |
+| **55** | `ServerBroadcastEvent` | **Yes** | `message` | Global announcement dispatched to all connected players. |
+

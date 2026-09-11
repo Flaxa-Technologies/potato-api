@@ -5,14 +5,17 @@ pub mod context;
 pub mod dialog;
 pub mod entity;
 pub mod event;
+pub mod game_event;
 pub mod gui;
 pub mod host;
 pub mod player;
 pub mod plugin;
+pub mod raytrace;
 pub mod scheduler;
 pub mod scoreboard;
 pub mod sound;
 pub mod text;
+pub mod toast;
 pub mod types;
 pub mod world;
 
@@ -29,16 +32,19 @@ pub use dialog::{
 };
 pub use entity::{Entity, LivingEntity};
 pub use event::*;
+pub use game_event::GameEvent;
 pub use gui::Gui;
 pub use player::Player;
 pub use plugin::{Plugin, PluginMetadata};
+pub use raytrace::RayTrace;
 pub use scheduler::{Scheduler, TaskHandle};
 pub use scoreboard::{DisplaySlot, ObjectiveCriteria, Scoreboard, Team};
 pub use sound::{Sound, SoundCategory};
 pub use text::{Component, NamedTextColor, TextDecoration};
+pub use toast::{Toast, ToastFrame};
 pub use types::{
-    Block, Difficulty, EquipmentSlot, GameMode, HostInventory, Inventory, ItemStack, Location,
-    PersistentDataContainer, PotionEffect, Vector3,
+    Block, BoundingBox, Difficulty, EquipmentSlot, GameMode, HostInventory, Inventory, ItemStack,
+    Location, PersistentDataContainer, PotionEffect, RayTraceResult, Vector3,
 };
 pub use uuid::Uuid;
 pub use world::World;
@@ -481,6 +487,67 @@ tags:
         assert_eq!(DialogClickActionEvent::EVENT_ID, 42);
         assert_eq!(DialogClearEvent::EVENT_ID, 43);
         assert_eq!(PlayerFormResponseEvent::EVENT_ID, 44);
+        assert_eq!(PlayerPortalEvent::EVENT_ID, 45);
+        assert_eq!(PlayerItemBreakEvent::EVENT_ID, 46);
+        assert_eq!(PlayerBucketEmptyEvent::EVENT_ID, 47);
+        assert_eq!(PlayerBucketFillEvent::EVENT_ID, 48);
+        assert_eq!(PlayerShearEntityEvent::EVENT_ID, 49);
+        assert_eq!(EntityDamageByBlockEvent::EVENT_ID, 50);
+        assert_eq!(EntityCombustEvent::EVENT_ID, 51);
+        assert_eq!(EntityCombustByEntityEvent::EVENT_ID, 52);
+        assert_eq!(PlayerAdvancementDoneEvent::EVENT_ID, 53);
+        assert_eq!(InventoryMoveItemEvent::EVENT_ID, 54);
+        assert_eq!(ServerBroadcastEvent::EVENT_ID, 55);
+    }
+
+    #[test]
+    fn test_math_and_raytrace() {
+        let v1 = Vector3::new(1.0, 2.0, 3.0);
+        let v2 = Vector3::new(4.0, 5.0, 6.0);
+        assert_eq!(v1.add(&v2), Vector3::new(5.0, 7.0, 9.0));
+        assert_eq!(v1.multiply(2.0), Vector3::new(2.0, 4.0, 6.0));
+        assert!(v1.length() > 0.0);
+
+        let bb = BoundingBox::new(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+        assert!(bb.contains(0.5, 0.5, 0.5));
+        assert!(!bb.contains(1.5, 0.5, 0.5));
+
+        let hit = bb.raytrace(Vector3::new(0.5, 0.5, -2.0), Vector3::new(0.0, 0.0, 1.0), 10.0);
+        assert!(hit.is_some());
+        assert!((hit.unwrap() - 2.0).abs() < 1e-4);
+
+        let trace = RayTrace::trace_blocks(
+            Vector3::new(0.0, 64.0, 0.0),
+            Vector3::new(0.0, -1.0, 0.0),
+            10.0,
+            0.5,
+            |x, y, z| {
+                if y <= 60 {
+                    Some(Block::new("minecraft:bedrock", 0))
+                } else {
+                    Some(Block::new("minecraft:air", 0))
+                }
+            },
+        );
+        assert!(trace.is_some());
+        let (b, _, r) = trace.unwrap();
+        assert_eq!(b.name(), "bedrock");
+        assert!(r.distance >= 4.0);
+    }
+
+    #[test]
+    fn test_toast_and_game_event() {
+        let toast = Toast::challenge("Dragon Slayer", "minecraft:dragon_head");
+        assert_eq!(toast.title, "Dragon Slayer");
+        assert_eq!(toast.frame, ToastFrame::Challenge);
+
+        let event = GameEvent::ChangeGameMode(GameMode::Creative);
+        let (id, val) = event.id_and_value();
+        assert_eq!(id, 3);
+        assert_eq!(val, 1.0);
+
+        let demo = GameEvent::DemoMessage;
+        assert_eq!(demo.id_and_value(), (5, 0.0));
     }
 }
 

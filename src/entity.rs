@@ -84,6 +84,61 @@ impl Entity {
         self.handle.damage(amount);
     }
 
+    /// Checks if the entity has a glowing outline.
+    pub fn is_glowing(&self) -> bool {
+        self.handle.is_glowing()
+    }
+
+    /// Sets whether the entity has a glowing outline.
+    pub fn set_glowing(&self, glowing: bool) {
+        self.handle.set_glowing(glowing);
+    }
+
+    /// Checks if the entity is invulnerable to damage.
+    pub fn is_invulnerable(&self) -> bool {
+        self.handle.is_invulnerable()
+    }
+
+    /// Sets whether the entity is invulnerable to damage.
+    pub fn set_invulnerable(&self, invulnerable: bool) {
+        self.handle.set_invulnerable(invulnerable);
+    }
+
+    /// Checks if the entity makes ambient and movement sounds.
+    pub fn is_silent(&self) -> bool {
+        self.handle.is_silent()
+    }
+
+    /// Sets whether the entity is silent.
+    pub fn set_silent(&self, silent: bool) {
+        self.handle.set_silent(silent);
+    }
+
+    /// Checks if the entity is affected by gravity.
+    pub fn has_gravity(&self) -> bool {
+        self.handle.has_gravity()
+    }
+
+    /// Sets whether the entity is affected by gravity.
+    pub fn set_gravity(&self, gravity: bool) {
+        self.handle.set_gravity(gravity);
+    }
+
+    /// Returns the list of scoreboard tags attached to this entity.
+    pub fn scoreboard_tags(&self) -> Vec<String> {
+        self.handle.scoreboard_tags()
+    }
+
+    /// Adds a scoreboard tag to this entity.
+    pub fn add_scoreboard_tag(&self, tag: &str) -> bool {
+        self.handle.add_scoreboard_tag(tag)
+    }
+
+    /// Removes a scoreboard tag from this entity.
+    pub fn remove_scoreboard_tag(&self, tag: &str) -> bool {
+        self.handle.remove_scoreboard_tag(tag)
+    }
+
     /// Attempts to view this entity as a living entity (e.g. mob or player).
     pub fn as_living(&self) -> Option<LivingEntity> {
         self.handle.as_living().map(LivingEntity::from_handle)
@@ -175,6 +230,16 @@ impl LivingEntity {
     /// Retrieves the maximum health points of this entity.
     pub fn max_health(&self) -> f32 {
         self.handle.max_health()
+    }
+
+    /// Returns the eye location of this living entity.
+    pub fn eye_location(&self) -> Location {
+        self.handle.eye_location()
+    }
+
+    /// Returns the eye height offset of this living entity (default 1.62).
+    pub fn eye_height(&self) -> f64 {
+        self.handle.eye_height()
     }
 }
 

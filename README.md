@@ -192,18 +192,21 @@ Every template and scaffolded plugin automatically comes bundled with **`AGENT.m
 Explore the complete API reference in the [`docs/`](docs/) directory:
 
 - 🏗️ **[Plugin Lifecycle & Architecture](docs/LIFECYCLE.md)**
-- ⚡ **[Event System & 44-Event Catalog](docs/EVENTS.md)** (with Block Break loot suppression, Dialog & Form events)
-- 🪟 **[Virtual GUI & Inventory API](docs/GUI_AND_INVENTORY.md)** (Chest GUIs, slot control, inventory manipulation)
+- ⚡ **[Event System & 55-Event Catalog](docs/EVENTS.md)** (with Block Break loot suppression, Dialog & Form events, World events)
+- 🪟 **[Virtual GUI & Inventory API](docs/GUI_AND_INVENTORY.md)** (Chest, Hopper, and Dispenser GUIs, slot control, inventory manipulation)
 - 💬 **[Dialog Box, Forms & Virtual Book API](docs/DIALOGS_AND_FORMS.md)** (Java 1.21.4+ Dialogs, Bedrock Forms, Books, Signs)
 - 📊 **[Scoreboards & Teams API](docs/SCOREBOARDS_AND_TEAMS.md)** (Fast sidebar scoreboards, custom objectives, teams)
 - 🔊 **[Sounds & Environmental World API](docs/SOUNDS_AND_ENVIRONMENT.md)** (Sound effects, lightning strikes, weather control)
 - 🧪 **[Potions & Particle Effects](docs/POTIONS_AND_PARTICLES.md)** (Status effects builder and particle broadcasts)
 - 🌲 **[Brigadier Command Tree API](docs/COMMANDS.md)**
 - 🎨 **[Adventure Text & MiniMessage](docs/TEXT_AND_MINIMESSAGE.md)**
-- 📦 **[Persistent Data Container (PDC) & Items](docs/PDC_AND_ITEMS.md)**
+- 📦 **[Persistent Data Container (PDC) & Items](docs/PDC_AND_ITEMS.md)** (with Item Attack Cooldown tracking)
 - ⏱️ **[Scheduler & Concurrency Model](docs/SCHEDULER.md)**
 - ⚙️ **[Configuration API (YAML)](docs/CONFIGURATION.md)**
 - 📊 **[Adventure BossBar API](docs/BOSSBAR.md)**
+- 🎯 **[Line-of-Sight Raytracing & Targeting API](docs/RAYTRACING_AND_TARGETING.md)** (Voxel raymarching, bounding box tests, crosshair targeting)
+- 🍞 **[Toasts, Game Events & Demo Screens](docs/TOASTS_AND_GAME_EVENTS.md)** (Advancement toasts, demo screens, client game events)
+- 🏷️ **[Advanced Entity Flags, Tags & Manipulation](docs/ADVANCED_ENTITIES.md)** (Glowing, invulnerability, silence, gravity, scoreboard tags)
 - 🔄 **[Paper Java to PotatoMC Rust Migration Guide](docs/PAPER_MIGRATION.md)**
 
 ---

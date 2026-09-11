@@ -973,4 +973,244 @@ impl Cancellable for PlayerFormResponseEvent {
     }
 }
 
+// ==========================================
+// 45. PlayerPortalEvent (EVENT_ID = 45)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerPortalEvent {
+    pub player: Player,
+    pub from: Location,
+    pub to: Option<Location>,
+    pub cancelled: bool,
+}
+
+impl Event for PlayerPortalEvent {
+    const EVENT_ID: u32 = 45;
+}
+
+impl Cancellable for PlayerPortalEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 46. PlayerItemBreakEvent (EVENT_ID = 46)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerItemBreakEvent {
+    pub player: Player,
+    pub broken_item: ItemStack,
+}
+
+impl Event for PlayerItemBreakEvent {
+    const EVENT_ID: u32 = 46;
+}
+
+// ==========================================
+// 47. PlayerBucketEmptyEvent (EVENT_ID = 47)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerBucketEmptyEvent {
+    pub player: Player,
+    pub block_clicked: Block,
+    pub bucket_item: ItemStack,
+    pub cancelled: bool,
+}
+
+impl Event for PlayerBucketEmptyEvent {
+    const EVENT_ID: u32 = 47;
+}
+
+impl Cancellable for PlayerBucketEmptyEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 48. PlayerBucketFillEvent (EVENT_ID = 48)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerBucketFillEvent {
+    pub player: Player,
+    pub block_clicked: Block,
+    pub bucket_item: ItemStack,
+    pub cancelled: bool,
+}
+
+impl Event for PlayerBucketFillEvent {
+    const EVENT_ID: u32 = 48;
+}
+
+impl Cancellable for PlayerBucketFillEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 49. PlayerShearEntityEvent (EVENT_ID = 49)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerShearEntityEvent {
+    pub player: Player,
+    pub entity: Entity,
+    pub item: ItemStack,
+    pub cancelled: bool,
+}
+
+impl Event for PlayerShearEntityEvent {
+    const EVENT_ID: u32 = 49;
+}
+
+impl Cancellable for PlayerShearEntityEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 50. EntityDamageByBlockEvent (EVENT_ID = 50)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct EntityDamageByBlockEvent {
+    pub entity: Entity,
+    pub damager_block: Option<Block>,
+    pub damage: f32,
+    pub cancelled: bool,
+}
+
+impl Event for EntityDamageByBlockEvent {
+    const EVENT_ID: u32 = 50;
+}
+
+impl Cancellable for EntityDamageByBlockEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 51. EntityCombustEvent (EVENT_ID = 51)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct EntityCombustEvent {
+    pub entity: Entity,
+    pub duration_secs: u32,
+    pub cancelled: bool,
+}
+
+impl Event for EntityCombustEvent {
+    const EVENT_ID: u32 = 51;
+}
+
+impl Cancellable for EntityCombustEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 52. EntityCombustByEntityEvent (EVENT_ID = 52)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct EntityCombustByEntityEvent {
+    pub entity: Entity,
+    pub combuster: Entity,
+    pub duration_secs: u32,
+    pub cancelled: bool,
+}
+
+impl Event for EntityCombustByEntityEvent {
+    const EVENT_ID: u32 = 52;
+}
+
+impl Cancellable for EntityCombustByEntityEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 53. PlayerAdvancementDoneEvent (EVENT_ID = 53)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerAdvancementDoneEvent {
+    pub player: Player,
+    pub advancement_id: String,
+}
+
+impl Event for PlayerAdvancementDoneEvent {
+    const EVENT_ID: u32 = 53;
+}
+
+// ==========================================
+// 54. InventoryMoveItemEvent (EVENT_ID = 54)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct InventoryMoveItemEvent {
+    pub source_slot: usize,
+    pub destination_slot: usize,
+    pub item: ItemStack,
+    pub cancelled: bool,
+}
+
+impl Event for InventoryMoveItemEvent {
+    const EVENT_ID: u32 = 54;
+}
+
+impl Cancellable for InventoryMoveItemEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 55. ServerBroadcastEvent (EVENT_ID = 55)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct ServerBroadcastEvent {
+    pub message: String,
+    pub cancelled: bool,
+}
+
+impl Event for ServerBroadcastEvent {
+    const EVENT_ID: u32 = 55;
+}
+
+impl Cancellable for ServerBroadcastEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+
 

@@ -14,7 +14,7 @@ impl Gui {
     /// Creates a new virtual GUI with the specified title and slot count.
     /// Standard chest sizes: 9, 18, 27, 36, 45, 54.
     pub fn new(title: impl Into<String>, size: usize) -> Self {
-        let actual_size = size.max(9);
+        let actual_size = size.max(1);
         Self {
             title: title.into(),
             size: actual_size,
@@ -28,6 +28,16 @@ impl Gui {
     pub fn chest(title: impl Into<String>, rows: usize) -> Self {
         let r = rows.clamp(1, 6);
         Self::new(title, r * 9)
+    }
+
+    /// Creates a 5-slot hopper menu.
+    pub fn hopper(title: impl Into<String>) -> Self {
+        Self::new(title, 5)
+    }
+
+    /// Creates a 3x3 (9 slots) dispenser or dropper menu.
+    pub fn dispenser(title: impl Into<String>) -> Self {
+        Self::new(title, 9)
     }
 
     /// Sets an item at the specified slot index (0-indexed).

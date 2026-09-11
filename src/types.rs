@@ -20,6 +20,157 @@ impl Vector3 {
             z: 0.0,
         }
     }
+
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
+    }
+
+    pub fn normalize(&self) -> Self {
+        let len = self.length();
+        if len > 0.0 {
+            Self::new(self.x / len, self.y / len, self.z / len)
+        } else {
+            *self
+        }
+    }
+
+    pub fn dot(&self, other: &Self) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    pub fn cross(&self, other: &Self) -> Self {
+        Self::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+    }
+
+    pub fn distance_squared(&self, other: &Self) -> f64 {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+        let dz = self.z - other.z;
+        dx * dx + dy * dy + dz * dz
+    }
+
+    pub fn distance(&self, other: &Self) -> f64 {
+        self.distance_squared(other).sqrt()
+    }
+
+    pub fn add(&self, other: &Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
+    }
+
+    pub fn multiply(&self, factor: f64) -> Self {
+        Self::new(self.x * factor, self.y * factor, self.z * factor)
+    }
+
+    /// Converts Minecraft yaw and pitch (in degrees) into a normalized unit vector.
+    pub fn from_yaw_pitch(yaw_deg: f32, pitch_deg: f32) -> Self {
+        let yaw_rad = (yaw_deg as f64).to_radians();
+        let pitch_rad = (pitch_deg as f64).to_radians();
+        let xz = -pitch_rad.cos();
+        Self::new(
+            xz * yaw_rad.sin(),
+            -pitch_rad.sin(),
+            -xz * yaw_rad.cos(),
+        )
+    }
+}
+
+/// Axis-aligned bounding box (AABB) for collision and raytracing.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BoundingBox {
+    pub min_x: f64,
+    pub min_y: f64,
+    pub min_z: f64,
+    pub max_x: f64,
+    pub max_y: f64,
+    pub max_z: f64,
+}
+
+impl BoundingBox {
+    pub fn new(min_x: f64, min_y: f64, min_z: f64, max_x: f64, max_y: f64, max_z: f64) -> Self {
+        Self {
+            min_x: min_x.min(max_x),
+            min_y: min_y.min(max_y),
+            min_z: min_z.min(max_z),
+            max_x: min_x.max(max_x),
+            max_y: min_y.max(max_y),
+            max_z: min_z.max(max_z),
+        }
+    }
+
+    pub fn of_point(pos: Vector3, width: f64, height: f64) -> Self {
+        let half_w = width / 2.0;
+        Self::new(
+            pos.x - half_w,
+            pos.y,
+            pos.z - half_w,
+            pos.x + half_w,
+            pos.y + height,
+            pos.z + half_w,
+        )
+    }
+
+    pub fn contains(&self, x: f64, y: f64, z: f64) -> bool {
+        x >= self.min_x && x <= self.max_x
+            && y >= self.min_y && y <= self.max_y
+            && z >= self.min_z && z <= self.max_z
+    }
+
+    pub fn intersects(&self, other: &Self) -> bool {
+        self.min_x <= other.max_x && self.max_x >= other.min_x
+            && self.min_y <= other.max_y && self.max_y >= other.min_y
+            && self.min_z <= other.max_z && self.max_z >= other.min_z
+    }
+
+    pub fn expand(&self, dx: f64, dy: f64, dz: f64) -> Self {
+        Self::new(
+            self.min_x - dx,
+            self.min_y - dy,
+            self.min_z - dz,
+            self.max_x + dx,
+            self.max_y + dy,
+            self.max_z + dz,
+        )
+    }
+
+    /// Performs slab-method ray intersection against this AABB.
+    /// Returns the distance to the intersection along the ray, if any.
+    pub fn raytrace(&self, start: Vector3, dir: Vector3, max_dist: f64) -> Option<f64> {
+        let inv_x = if dir.x != 0.0 { 1.0 / dir.x } else { f64::INFINITY };
+        let inv_y = if dir.y != 0.0 { 1.0 / dir.y } else { f64::INFINITY };
+        let inv_z = if dir.z != 0.0 { 1.0 / dir.z } else { f64::INFINITY };
+
+        let t1 = (self.min_x - start.x) * inv_x;
+        let t2 = (self.max_x - start.x) * inv_x;
+        let t3 = (self.min_y - start.y) * inv_y;
+        let t4 = (self.max_y - start.y) * inv_y;
+        let t5 = (self.min_z - start.z) * inv_z;
+        let t6 = (self.max_z - start.z) * inv_z;
+
+        let tmin = t1.min(t2).max(t3.min(t4)).max(t5.min(t6));
+        let tmax = t1.max(t2).min(t3.max(t4)).min(t5.max(t6));
+
+        if tmax < 0.0 || tmin > tmax || tmin > max_dist {
+            None
+        } else {
+            Some(tmin.max(0.0))
+        }
+    }
+}
+
+/// Result of a raytrace query against blocks or entities.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RayTraceResult {
+    pub hit_position: Vector3,
+    pub hit_normal: Option<Vector3>,
+    pub distance: f64,
 }
 
 /// Represents a precise position and rotation within a specific world.

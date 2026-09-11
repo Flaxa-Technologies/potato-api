@@ -452,6 +452,60 @@ impl Player {
     pub fn send_plugin_message(&self, channel: &str, data: &[u8]) {
         self.handle.send_plugin_message(channel, data);
     }
+
+    /// Returns the player's eye location.
+    pub fn eye_location(&self) -> Location {
+        let mut loc = self.location();
+        loc.y += 1.62;
+        loc
+    }
+
+    /// Returns a unit Vector3 representing the direction the player is looking.
+    pub fn facing_direction(&self) -> crate::types::Vector3 {
+        let loc = self.location();
+        crate::types::Vector3::from_yaw_pitch(loc.yaw, loc.pitch)
+    }
+
+    /// Sets an item cooldown in ticks (renders grey wipe overlay on client).
+    pub fn set_item_cooldown(&self, item_id: &str, ticks: u32) {
+        self.handle.set_item_cooldown(item_id, ticks);
+    }
+
+    /// Returns the remaining cooldown ticks for an item, or 0 if inactive.
+    pub fn get_item_cooldown(&self, item_id: &str) -> u32 {
+        self.handle.get_item_cooldown(item_id)
+    }
+
+    /// Checks whether an item is currently on cooldown for this player.
+    pub fn has_item_cooldown(&self, item_id: &str) -> bool {
+        self.handle.has_item_cooldown(item_id)
+    }
+
+    /// Displays an advancement toast notification in the corner of the player's screen.
+    pub fn send_toast(&self, toast: &crate::toast::Toast) {
+        self.handle.send_toast(&toast.title, &toast.icon, toast.frame as u8);
+    }
+
+    /// Sends the Minecraft Demo Welcome screen popup to the player.
+    pub fn send_demo_screen(&self) {
+        self.handle.send_demo_screen();
+    }
+
+    /// Sends a native client game event packet (e.g. rain, elder guardian, credits).
+    pub fn send_game_event(&self, event: crate::game_event::GameEvent) {
+        let (id, val) = event.id_and_value();
+        self.handle.send_game_event(id, val);
+    }
+
+    /// Raytraces from the player's eye along their line of sight to find the targeted block.
+    pub fn get_target_block(&self, max_distance: f64) -> Option<crate::types::Block> {
+        self.handle.get_target_block(max_distance)
+    }
+
+    /// Raytraces from the player's eye along their line of sight to find the targeted entity.
+    pub fn get_target_entity(&self, max_distance: f64) -> Option<crate::entity::Entity> {
+        self.handle.get_target_entity(max_distance).map(crate::entity::Entity::from_handle)
+    }
 }
 
 impl std::fmt::Debug for Player {

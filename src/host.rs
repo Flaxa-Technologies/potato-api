@@ -101,6 +101,10 @@ pub trait HostPlayer: Send + Sync {
     fn send_game_event(&self, _event_type: u8, _value: f32) {}
     fn get_target_block(&self, _max_distance: f64) -> Option<Block> { None }
     fn get_target_entity(&self, _max_distance: f64) -> Option<Arc<dyn HostEntity>> { None }
+    fn set_player_scoreboard(&self, _scoreboard_json: &str) {}
+    fn reset_player_scoreboard(&self) {}
+    fn set_permission(&self, _node: &str, _value: bool) {}
+    fn unset_permission(&self, _node: &str) {}
 }
 
 pub trait HostWorld: Send + Sync {
@@ -167,6 +171,8 @@ pub trait HostEntity: Send + Sync {
     fn scoreboard_tags(&self) -> Vec<String> { Vec::new() }
     fn add_scoreboard_tag(&self, _tag: &str) -> bool { false }
     fn remove_scoreboard_tag(&self, _tag: &str) -> bool { false }
+    fn persistent_data_json(&self) -> String { "{}".to_string() }
+    fn set_persistent_data_json(&self, _json: &str) {}
 }
 
 pub trait HostLivingEntity: Send + Sync {
@@ -216,4 +222,6 @@ pub trait HostContext: Send + Sync {
     fn shutdown(&self) {}
     fn reload(&self) {}
     fn send_plugin_message(&self, _player: &Uuid, _channel: &str, _data: &[u8]) {}
+    fn spawn_npc(&self, _name: &str, _entity_type: &str, _location: &Location, _pose: u32, _skin: Option<(&str, Option<&str>)>, _glowing: bool) -> Option<Arc<dyn crate::npc::HostNpc>> { None }
+    fn register_permission(&self, _node: &str, _description: Option<&str>, _default_op: bool) {}
 }

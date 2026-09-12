@@ -1,6 +1,7 @@
 use crate::entity::{Entity, LivingEntity};
 use crate::player::Player;
-use crate::types::{Block, GameMode, ItemStack, Location};
+use crate::npc::NpcClickType;
+use crate::types::{Block, EquipmentSlot, GameMode, ItemStack, Location};
 
 /// Event priority in execution order, mirroring Paper/Bukkit EventPriority.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -1211,6 +1212,108 @@ impl Cancellable for ServerBroadcastEvent {
         self.cancelled = cancelled;
     }
 }
+
+// ==========================================
+// 56. ScoreboardScoreChangeEvent (EVENT_ID = 56)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct ScoreboardScoreChangeEvent {
+    pub scoreboard_name: String,
+    pub objective_name: String,
+    pub entry: String,
+    pub previous_score: Option<i32>,
+    pub new_score: i32,
+    pub cancelled: bool,
+}
+
+impl Event for ScoreboardScoreChangeEvent {
+    const EVENT_ID: u32 = 56;
+}
+
+impl Cancellable for ScoreboardScoreChangeEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 57. NpcInteractEvent (EVENT_ID = 57)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct NpcInteractEvent {
+    pub player: Player,
+    pub npc_id: u32,
+    pub click_type: NpcClickType,
+    pub hand: EquipmentSlot,
+    pub cancelled: bool,
+}
+
+impl Event for NpcInteractEvent {
+    const EVENT_ID: u32 = 57;
+}
+
+impl Cancellable for NpcInteractEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 58. PlayerMaceSmashEvent (EVENT_ID = 58)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct PlayerMaceSmashEvent {
+    pub player: Player,
+    pub target: Entity,
+    pub fall_distance: f32,
+    pub damage: f32,
+    pub cancelled: bool,
+}
+
+impl Event for PlayerMaceSmashEvent {
+    const EVENT_ID: u32 = 58;
+}
+
+impl Cancellable for PlayerMaceSmashEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
+// ==========================================
+// 59. WindChargeDetonateEvent (EVENT_ID = 59)
+// ==========================================
+#[derive(Clone, Debug)]
+pub struct WindChargeDetonateEvent {
+    pub shooter: Option<Player>,
+    pub location: Location,
+    pub radius: f32,
+    pub knockback: f32,
+    pub cancelled: bool,
+}
+
+impl Event for WindChargeDetonateEvent {
+    const EVENT_ID: u32 = 59;
+}
+
+impl Cancellable for WindChargeDetonateEvent {
+    fn is_cancelled(&self) -> bool {
+        self.cancelled
+    }
+    fn set_cancelled(&mut self, cancelled: bool) {
+        self.cancelled = cancelled;
+    }
+}
+
 
 
 

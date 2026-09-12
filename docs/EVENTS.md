@@ -89,7 +89,7 @@ Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying a
 
 ---
 
-## 5. Complete 55-Event Catalog
+## 5. Complete 59-Event Catalog
 
 | ID | Event Struct | Cancellable | Key Fields & Methods | Description |
 |:---:|---|:---:|---|---|
@@ -148,4 +148,9 @@ Calling `event.set_cancelled(true)` instructs PotatoMC to abort the underlying a
 | **53** | `PlayerAdvancementDoneEvent` | No | `player`, `advancement_id` | Player achieved or completed an in-game advancement criteria. |
 | **54** | `InventoryMoveItemEvent` | **Yes** | `source_slot`, `destination_slot`, `item` | Hopper or automation moved an item between containers. |
 | **55** | `ServerBroadcastEvent` | **Yes** | `message` | Global announcement dispatched to all connected players. |
+| **56** | `ScoreboardScoreChangeEvent` | **Yes** | `scoreboard_name`, `objective_name`, `entry`, `previous_score`, `new_score` | Scoreboard score entry updated or modified. |
+| **57** | `NpcInteractEvent` | **Yes** | `player`, `npc_id`, `click_type`, `hand` | Player left-clicked (attacked) or right-clicked an NPC. |
+| **58** | `PlayerMaceSmashEvent` | **Yes** | `player`, `target`, `fall_distance`, `damage` | Player executed a mace smash attack from height. |
+| **59** | `WindChargeDetonateEvent` | **Yes** | `shooter`, `location`, `radius`, `knockback` | Wind charge burst projectile detonated in the world. |
+
 

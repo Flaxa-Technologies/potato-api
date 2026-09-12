@@ -139,6 +139,19 @@ impl Entity {
         self.handle.remove_scoreboard_tag(tag)
     }
 
+    /// Returns a copy of the persistent data container attached to this entity.
+    pub fn persistent_data(&self) -> crate::types::PersistentDataContainer {
+        let json = self.handle.persistent_data_json();
+        serde_json::from_str(&json).unwrap_or_default()
+    }
+
+    /// Updates the persistent data container for this entity.
+    pub fn set_persistent_data(&self, pdc: &crate::types::PersistentDataContainer) {
+        if let Ok(json) = serde_json::to_string(pdc) {
+            self.handle.set_persistent_data_json(&json);
+        }
+    }
+
     /// Attempts to view this entity as a living entity (e.g. mob or player).
     pub fn as_living(&self) -> Option<LivingEntity> {
         self.handle.as_living().map(LivingEntity::from_handle)

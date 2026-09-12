@@ -29,7 +29,7 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
 
 2. **[Event System & Cancellable](EVENTS.md)**
    - Publisher / Observer pattern
-   - Complete 55-event catalog (IDs 1–55)
+   - Complete 59-event catalog (IDs 1–59)
    - Block break loot suppression via `set_drop_items(false)`
    - `Cancellable` trait & stopping vanilla actions
    - `EventPriority` ordering (`Lowest` to `Monitor`)
@@ -117,7 +117,19 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
     - Scoreboard tags (`add_scoreboard_tag`, `remove_scoreboard_tag`, `scoreboard_tags`)
     - Precise eye height and eye location calculation
 
-17. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
+17. **[NPC & Fake Player API](NPC_API.md)**
+    - Spawning fake player and mob NPCs (`Npc::builder`)
+    - Controlling skin textures, poses, and equipment
+    - Click interaction handling (`NpcInteractEvent`)
+    - Waypoint pathing navigation (`npc.move_to`)
+    - Pluggable behavior traits (`NpcBehavior`) without touching core engine code
+
+18. **[Custom Model Data & Item Variants](CUSTOM_MODEL_DATA.md)**
+    - Direct CustomModelData getters & setters on `ItemStack`
+    - Declarative resource-pack-driven item templates (`ItemVariant`)
+    - Central catalog and matching without raw NBT (`ItemVariantRegistry`)
+
+19. **[Paper to PotatoMC Migration Guide](PAPER_MIGRATION.md)**
     - Side-by-side Java vs. Rust code translations
     - Differences in threading and memory models
 

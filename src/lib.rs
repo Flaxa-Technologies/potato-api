@@ -8,6 +8,9 @@ pub mod event;
 pub mod game_event;
 pub mod gui;
 pub mod host;
+pub mod item_variant;
+pub mod npc;
+pub mod permission;
 pub mod player;
 pub mod plugin;
 pub mod raytrace;
@@ -34,11 +37,14 @@ pub use entity::{Entity, LivingEntity};
 pub use event::*;
 pub use game_event::GameEvent;
 pub use gui::Gui;
+pub use item_variant::{ItemVariant, ItemVariantBuilder, ItemVariantRegistry};
+pub use npc::{EntityPose, HostNpc, Npc, NpcBehavior, NpcBuilder, NpcClickType, NpcType, SkinData};
+pub use permission::{Permission, PermissionDefault, PermissionManager};
 pub use player::Player;
 pub use plugin::{Plugin, PluginMetadata};
 pub use raytrace::RayTrace;
 pub use scheduler::{Scheduler, TaskHandle};
-pub use scoreboard::{DisplaySlot, ObjectiveCriteria, Scoreboard, Team};
+pub use scoreboard::{DisplaySlot, Objective, ObjectiveCriteria, RenderType, ScoreEntry, Scoreboard, ScoreboardManager, Team};
 pub use sound::{Sound, SoundCategory};
 pub use text::{Component, NamedTextColor, TextDecoration};
 pub use toast::{Toast, ToastFrame};
@@ -548,6 +554,83 @@ tags:
 
         let demo = GameEvent::DemoMessage;
         assert_eq!(demo.id_and_value(), (5, 0.0));
+    }
+
+    #[test]
+    fn test_custom_model_data_and_variants() {
+        let mut item = ItemStack::new("minecraft:diamond_sword", 1);
+        assert_eq!(item.custom_model_data(), None);
+        item.set_custom_model_data(Some(1001));
+        assert_eq!(item.custom_model_data(), Some(1001));
+
+        let variant = ItemVariant::builder("minecraft:diamond_sword")
+            .custom_model_data(1001)
+            .name("§cRuby Sword")
+            .lore(["§7Rare blade"])
+            .persistent_tag("weapon_id", "ruby_sword")
+            .unbreakable(true)
+            .build();
+
+        let registry = ItemVariantRegistry::new();
+        registry.register("mmo:ruby_sword", variant);
+
+        let created = registry.create("mmo:ruby_sword", 1).unwrap();
+        assert_eq!(created.custom_model_data(), Some(1001));
+        assert_eq!(created.custom_name.as_deref(), Some("§cRuby Sword"));
+        assert!(registry.matches(&created, "mmo:ruby_sword"));
+        assert_eq!(registry.identify(&created), Some("mmo:ruby_sword".to_string()));
+    }
+
+    #[test]
+    fn test_scoreboard_objectives_and_scores() {
+        let mut sb = Scoreboard::new("test_board", "Test", DisplaySlot::Sidebar);
+        sb.register_objective("kills", "Player Kills", ObjectiveCriteria::PlayerKillCount, DisplaySlot::Sidebar);
+        assert_eq!(sb.objectives().len(), 1);
+        assert_eq!(sb.get_objective("kills").unwrap().display_name, "Player Kills");
+
+        sb.set_score("Steve", "kills", 42);
+        assert_eq!(sb.get_score("Steve", "kills"), Some(42));
+        sb.reset_score("Steve", "kills");
+        assert_eq!(sb.get_score("Steve", "kills"), None);
+
+        let mut team = Team::new("admins");
+        team.prefix = Some("[Admin] ".to_string());
+        sb.add_team(team);
+        assert_eq!(sb.teams().len(), 1);
+        assert_eq!(sb.get_team("admins").unwrap().prefix.as_deref(), Some("[Admin] "));
+    }
+
+    #[test]
+    fn test_npc_builder_and_behavior() {
+        let builder = Npc::builder("Shopkeeper")
+            .player()
+            .pose(EntityPose::Sneaking)
+            .glowing(true)
+            .invulnerable(true);
+
+        assert_eq!(builder.get_name(), "Shopkeeper");
+        assert_eq!(builder.get_pose(), EntityPose::Sneaking);
+        assert!(builder.is_glowing());
+        assert!(builder.is_invulnerable());
+    }
+
+    #[test]
+    fn test_events_56_to_59() {
+        assert_eq!(ScoreboardScoreChangeEvent::EVENT_ID, 56);
+        assert_eq!(NpcInteractEvent::EVENT_ID, 57);
+        assert_eq!(PlayerMaceSmashEvent::EVENT_ID, 58);
+        assert_eq!(WindChargeDetonateEvent::EVENT_ID, 59);
+    }
+
+    #[test]
+    fn test_permission_manager() {
+        let pm = PermissionManager::new();
+        pm.register(Permission::new("myplugin.admin").with_default(PermissionDefault::Op));
+        let player_uuid = Uuid::new_v4();
+        pm.set_player_permission(player_uuid, "myplugin.admin", true);
+        assert_eq!(pm.get_player_override(&player_uuid, "myplugin.admin"), Some(true));
+        pm.unset_player_permission(&player_uuid, "myplugin.admin");
+        assert_eq!(pm.get_player_override(&player_uuid, "myplugin.admin"), None);
     }
 }
 

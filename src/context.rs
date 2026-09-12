@@ -237,6 +237,90 @@ impl Server {
     pub fn send_plugin_message(&self, player: &Player, channel: &str, data: &[u8]) {
         self.host.send_plugin_message(&player.uuid(), channel, data);
     }
+
+    /// Spawns a new NPC in the world using the configured builder.
+    pub fn spawn_npc(&self, mut builder: crate::npc::NpcBuilder) -> crate::npc::Npc {
+        let name = builder.get_name().to_string();
+        let entity_type = match builder.get_type() {
+            crate::npc::NpcType::Player { .. } => "minecraft:player".to_string(),
+            crate::npc::NpcType::Entity { entity_type } => entity_type.clone(),
+        };
+        let loc = builder.get_location().cloned().unwrap_or_else(|| {
+            crate::types::Location::new("minecraft:overworld", 0.0, 64.0, 0.0, 0.0, 0.0)
+        });
+        let pose = builder.get_pose().to_protocol_id();
+        let skin = match builder.get_type() {
+            crate::npc::NpcType::Player { skin: Some(s) } => {
+                Some((s.value.as_str(), s.signature.as_deref()))
+            }
+            _ => None,
+        };
+        let glowing = builder.is_glowing();
+        let behavior = builder.take_behavior();
+
+        if let Some(host_npc) = self.host.spawn_npc(&name, &entity_type, &loc, pose, skin, glowing) {
+            crate::npc::Npc::new(host_npc, behavior)
+        } else {
+            static NEXT_NPC_ID: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(200_000);
+            let id = NEXT_NPC_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+            struct FallbackNpc {
+                id: u32,
+                uuid: uuid::Uuid,
+                name: String,
+                location: std::sync::RwLock<crate::types::Location>,
+                pose: std::sync::RwLock<crate::npc::EntityPose>,
+                skin: std::sync::RwLock<Option<crate::npc::SkinData>>,
+                glowing: std::sync::atomic::AtomicBool,
+                valid: std::sync::atomic::AtomicBool,
+            }
+
+            impl crate::npc::HostNpc for FallbackNpc {
+                fn id(&self) -> u32 { self.id }
+                fn uuid(&self) -> uuid::Uuid { self.uuid }
+                fn name(&self) -> String { self.name.clone() }
+                fn set_name(&self, _name: &str) {}
+                fn location(&self) -> crate::types::Location { self.location.read().unwrap().clone() }
+                fn teleport(&self, loc: &crate::types::Location) -> bool {
+                    *self.location.write().unwrap() = loc.clone();
+                    true
+                }
+                fn move_to(&self, loc: &crate::types::Location, _speed: f64) {
+                    *self.location.write().unwrap() = loc.clone();
+                }
+                fn pose(&self) -> crate::npc::EntityPose { *self.pose.read().unwrap() }
+                fn set_pose(&self, p: crate::npc::EntityPose) { *self.pose.write().unwrap() = p; }
+                fn skin(&self) -> Option<crate::npc::SkinData> { self.skin.read().unwrap().clone() }
+                fn set_skin(&self, s: crate::npc::SkinData) { *self.skin.write().unwrap() = Some(s); }
+                fn is_glowing(&self) -> bool { self.glowing.load(std::sync::atomic::Ordering::Relaxed) }
+                fn set_glowing(&self, g: bool) { self.glowing.store(g, std::sync::atomic::Ordering::Relaxed); }
+                fn set_equipment(&self, _slot: crate::types::EquipmentSlot, _item: Option<crate::types::ItemStack>) {}
+                fn despawn(&self) { self.valid.store(false, std::sync::atomic::Ordering::Relaxed); }
+                fn is_valid(&self) -> bool { self.valid.load(std::sync::atomic::Ordering::Relaxed) }
+            }
+
+            let fallback = Arc::new(FallbackNpc {
+                id,
+                uuid: uuid::Uuid::new_v4(),
+                name,
+                location: std::sync::RwLock::new(loc),
+                pose: std::sync::RwLock::new(builder.get_pose()),
+                skin: std::sync::RwLock::new(match builder.get_type() {
+                    crate::npc::NpcType::Player { skin: Some(s) } => Some(s.clone()),
+                    _ => None,
+                }),
+                glowing: std::sync::atomic::AtomicBool::new(glowing),
+                valid: std::sync::atomic::AtomicBool::new(true),
+            });
+            crate::npc::Npc::new(fallback, behavior)
+        }
+    }
+
+    /// Registers a permission node with the server.
+    pub fn register_permission(&self, permission: crate::permission::Permission) {
+        let is_op = permission.default_value == crate::permission::PermissionDefault::Op;
+        self.host.register_permission(&permission.name, permission.description.as_deref(), is_op);
+    }
 }
 
 struct EventAdapter<E: Event, H: EventHandler<E>> {

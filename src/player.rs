@@ -434,11 +434,29 @@ impl Player {
     /// Displays a custom Scoreboard to the player.
     pub fn set_scoreboard(&self, scoreboard: &crate::scoreboard::Scoreboard) {
         self.handle.set_scoreboard_lines(&scoreboard.title, &scoreboard.lines);
+        if let Ok(json) = serde_json::to_string(scoreboard) {
+            self.handle.set_player_scoreboard(&json);
+        }
     }
 
     /// Clears the scoreboard / sidebar for this player.
     pub fn clear_scoreboard(&self) {
         self.handle.clear_scoreboard();
+    }
+
+    /// Resets the player's scoreboard back to the main server scoreboard.
+    pub fn reset_scoreboard(&self) {
+        self.handle.reset_player_scoreboard();
+    }
+
+    /// Dynamically grants or denies a permission node for this player.
+    pub fn set_permission(&self, node: &str, value: bool) {
+        self.handle.set_permission(node, value);
+    }
+
+    /// Removes a player-specific override for this permission node.
+    pub fn unset_permission(&self, node: &str) {
+        self.handle.unset_permission(node);
     }
 
     /// Fast helper to render a sidebar scoreboard with given title and lines.

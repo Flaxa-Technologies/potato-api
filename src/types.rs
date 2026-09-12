@@ -347,7 +347,7 @@ pub enum EquipmentSlot {
 }
 
 /// Persistent Data Container (PDC) allowing plugins to attach typed key-value data to items/entities.
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct PersistentDataContainer {
     pub(crate) strings: std::collections::HashMap<String, String>,
     pub(crate) ints: std::collections::HashMap<String, i32>,
@@ -408,7 +408,7 @@ impl PersistentDataContainer {
 }
 
 /// Represents an item stack with type, amount, enchantments, lore, and PersistentDataContainer.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ItemStack {
     /// The namespaced item identifier, e.g. "minecraft:diamond_sword".
     pub item_type: String,
@@ -422,6 +422,8 @@ pub struct ItemStack {
     pub enchantments: std::collections::HashMap<String, u32>,
     /// Persistent data container attached to this item.
     pub persistent_data: PersistentDataContainer,
+    /// Optional CustomModelData integer (used by resource packs).
+    pub custom_model_data: Option<i32>,
 }
 
 impl ItemStack {
@@ -433,6 +435,7 @@ impl ItemStack {
             lore: Vec::new(),
             enchantments: std::collections::HashMap::new(),
             persistent_data: PersistentDataContainer::new(),
+            custom_model_data: None,
         }
     }
 
@@ -490,6 +493,19 @@ impl ItemStack {
 
     pub fn has_enchantment(&self, enchantment: &str) -> bool {
         self.enchantments.contains_key(enchantment)
+    }
+
+    pub fn custom_model_data(&self) -> Option<i32> {
+        self.custom_model_data
+    }
+
+    pub fn set_custom_model_data(&mut self, cmd: Option<i32>) {
+        self.custom_model_data = cmd;
+    }
+
+    pub fn with_custom_model_data(mut self, cmd: i32) -> Self {
+        self.custom_model_data = Some(cmd);
+        self
     }
 
     pub fn is_empty(&self) -> bool {

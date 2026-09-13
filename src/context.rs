@@ -165,6 +165,11 @@ impl PluginContext {
     pub fn server(&self) -> Server {
         Server::new(self.host.clone())
     }
+
+    /// Spawns a new NPC in the world using the configured builder.
+    pub fn spawn_npc(&self, builder: crate::npc::NpcBuilder) -> crate::npc::Npc {
+        self.server().spawn_npc(builder)
+    }
 }
 
 /// Safe abstraction representing the Minecraft Server instance (Paper's `Bukkit.getServer()`).
@@ -198,14 +203,14 @@ impl Server {
         self.host.dispatch_command(command)
     }
 
-    /// Broadcasts a chat message to all connected players.
+    /// Broadcasts a chat message to all connected players across the entire server.
     pub fn broadcast(&self, message: &str) {
         self.host.broadcast(message);
     }
 
-    /// Broadcasts a rich Adventure text component to all connected players.
+    /// Broadcasts a rich Adventure text component to all connected players across the entire server.
     pub fn broadcast_component(&self, component: &crate::text::Component) {
-        self.host.broadcast(&component.to_legacy_string());
+        self.broadcast(&component.to_legacy_string());
     }
 
     /// Returns the server version string.
@@ -228,6 +233,27 @@ impl Server {
         self.host.shutdown();
     }
 
+    /// Gets a player by their exact username.
+    pub fn player_by_name(&self, name: &str) -> Option<Player> {
+        self.host.get_player_by_name(name).map(Player::from_handle)
+    }
+
+    /// Gets a player by their unique UUID.
+    pub fn player_by_uuid(&self, uuid: &uuid::Uuid) -> Option<Player> {
+        self.host.get_player_by_uuid(uuid).map(Player::from_handle)
+    }
+
+    /// Gets a world by its identifier namespace (e.g. `minecraft:overworld`).
+    pub fn world(&self, name: &str) -> Option<crate::world::World> {
+        self.host.get_world(name).map(crate::world::World::from_handle)
+    }
+
+    /// Gets a list of all loaded worlds on the server.
+    pub fn worlds(&self) -> Vec<crate::world::World> {
+        self.host.get_worlds().into_iter().map(crate::world::World::from_handle).collect()
+    }
+
+
     /// Reloads server configurations and reloadable subsystems.
     pub fn reload(&self) {
         self.host.reload();
@@ -249,12 +275,13 @@ impl Server {
             crate::types::Location::new("minecraft:overworld", 0.0, 64.0, 0.0, 0.0, 0.0)
         });
         let pose = builder.get_pose().to_protocol_id();
-        let skin = match builder.get_type() {
+        let skin_data = match builder.get_type() {
             crate::npc::NpcType::Player { skin: Some(s) } => {
-                Some((s.value.as_str(), s.signature.as_deref()))
+                Some((s.value.clone(), s.signature.clone()))
             }
             _ => None,
         };
+        let skin = skin_data.as_ref().map(|(v, sig)| (v.as_str(), sig.as_deref()));
         let glowing = builder.is_glowing();
         let behavior = builder.take_behavior();
 

@@ -133,6 +133,11 @@ Welcome to the complete developer documentation for PotatoMC native plugins. Exp
     - Side-by-side Java vs. Rust code translations
     - Differences in threading and memory models
 
+20. **[Complete API Reference & Parity Mapping](POTATO_API.md)**
+    - Comprehensive side-by-side Bukkit/Spigot/Paper to PotatoMC feature parity mapping
+    - Native library dynamic linking (`cdylib`), lifecycle hooks, and project setup
+    - Production guide for Windows (`.dll`), Linux (`.so`), and macOS (`.dylib`)
+
 ---
 
 ## ⚡ Instant Setup Links

@@ -84,6 +84,12 @@ pub struct Scoreboard {
     pub teams: Vec<Team>,
 }
 
+impl Default for Scoreboard {
+    fn default() -> Self {
+        Self::new("main", "Scoreboard", DisplaySlot::Sidebar)
+    }
+}
+
 impl Scoreboard {
     pub fn new(name: impl Into<String>, title: impl Into<String>, slot: DisplaySlot) -> Self {
         Self {
